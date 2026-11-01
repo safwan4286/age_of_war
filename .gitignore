@@ -1,0 +1,42 @@
+# Flutter / Dart
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+build/
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+**/generated_plugin_registrant.*
+coverage/
+
+# fvm
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.DS_Store
+
+# Android
+**/android/.gradle
+**/android/captures/
+**/android/local.properties
+**/android/key.properties
+**/android/app/upload-keystore.jks
+**/android/app/google-services.json
+
+# iOS
+**/ios/Pods/
+**/ios/.symlinks/
+**/ios/Flutter/ephemeral/
+**/ios/Runner/GoogleService-Info.plist
+**/ios/Flutter/flutter_export_environment.sh
+
+# Secrets (keys live in --dart-define-from-file, never in git)
+secrets/
+*.env.json
+
+# FVM Version Cache
+.fvm/
+# Python
+__pycache__/

@@ -1,0 +1,15 @@
+{
+  "sprite": "clubman",
+  "sheet": "clubman_all_state_new.png",
+  "height": 180,
+  "drawScale": 0.61,
+  "width": 48,
+  "rows": {"idle": 4, "walk": 4, "attack": 4, "die": 3},
+  "play": {
+    "idle": [1, 1, 2, 3, 3, 2, 1, 1, 4],
+    "walk": [1, 2, 3, 4],
+    "attack": [1, 1, 2, 3, 4, 4, 4, 4],
+    "die": [1, 2, 3, 3, 3]
+  },
+  "frameTimes": {"idle": 0.16, "walk": 0.25}
+}

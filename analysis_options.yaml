@@ -1,0 +1,14 @@
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  exclude:
+    - build/**
+    - android/**
+    - ios/**
+    - tools/**
+
+linter:
+  rules:
+    prefer_single_quotes: true
+    prefer_final_locals: true
+    avoid_print: true

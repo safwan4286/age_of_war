@@ -1,0 +1,25 @@
+{
+  "id": "brute",
+  "name": "Brute",
+  "cost": 120,
+  "trainTime": 2.5,
+  "hp": 220,
+  "damage": 28,
+  "attackEvery": 1.1,
+  "range": 22,
+  "speed": 42,
+  "killReward": 156,
+  "xp": 100,
+  "width": 36,
+  "sprite": "brute",
+  "frameW": 157,
+  "frameH": 108,
+  "drawScale": 1.0,
+  "frames": {
+    "idle": 4,
+    "walk": 8,
+    "attack": 6,
+    "die": 6
+  },
+  "_note": "Parked until its art is redone (video tool for walk/idle/death, Gemini for attack). Paste back into assets/data/units.json -> units to re-enable."
+}

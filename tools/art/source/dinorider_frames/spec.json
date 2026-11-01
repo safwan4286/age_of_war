@@ -1,0 +1,20 @@
+{
+  "sprite": "dinorider",
+  "height": 190,
+  "drawScale": 0.7,
+  "width": 64,
+  "sheets": [
+    {"file": "dinorider_idle_frames.png", "cell": 640, "anim": "idle"},
+    {"file": "dinorider_walk_frames.png", "cell": 640, "anim": "walk"},
+    {"file": "dinorider_attack.png", "rows": ["attack", "attack"]},
+    {"file": "dinorider_death_frames.png", "cell": 640, "anim": "die"}
+  ],
+  "match": {"walk": false, "attack": [6], "die": false},
+  "play": {
+    "idle": [1, 2, 3, 4, 5, 6, 7, 8],
+    "walk": [1, 2, 3, 4, 5, 6, 7, 8],
+    "attack": [1, 2, 3, 4, 5, 6],
+    "die": [7, 8, 10, 11, 12, 12]
+  },
+  "frameTimes": {"idle": 0.15, "walk": 0.08}
+}

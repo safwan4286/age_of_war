@@ -1,0 +1,47 @@
+name: epoch_clash
+description: Epoch Clash — a 2D lane battle through the ages. Stone Age vertical slice.
+publish_to: none
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.13.0
+  flutter: ">=3.41.0"
+
+# flame 1.38.2 needs Flutter >= 3.41 (we're on 3.47.5 via fvm).
+# get / hive_ce versions match the BP app so both resolve the same way.
+dependencies:
+  flutter:
+    sdk: flutter
+  flame: ^1.38.2
+  get: ^4.7.3
+  hive_ce: ^2.16.0
+  hive_ce_flutter: ^2.3.4
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/data/
+    - assets/images/units/
+    - assets/images/bases/
+    - assets/images/bg/
+    - assets/images/icons/
+    - assets/images/fx/
+    - assets/images/ui/
+    - assets/fonts/
+
+  fonts:
+    # Both SIL Open Font License 1.1 (assets/fonts/OFL-*.txt).
+    - family: Silkscreen
+      fonts:
+        - asset: assets/fonts/Silkscreen-Regular.ttf
+        - asset: assets/fonts/Silkscreen-Bold.ttf
+          weight: 700
+    - family: PixelifySans
+      fonts:
+        - asset: assets/fonts/PixelifySans.ttf

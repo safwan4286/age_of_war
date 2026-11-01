@@ -1,0 +1,192 @@
+{
+  "version": 1,
+  "lane": {
+    "length": 1600,
+    "baseWidth": 120,
+    "spawnGap": 26
+  },
+  "economy": {
+    "startGold": 175,
+    "trickle": 2,
+    "queueMax": 5,
+    "evolveXp": 4000,
+    "popCap": 10
+  },
+  "base": {
+    "hp": 1000,
+    "art": {
+      "_note": "Placeholder cave art; re-measure when the cliff base arrives.",
+      "height": 280,
+      "gate": 0.56,
+      "slots": [
+        [
+          0.86,
+          0.36
+        ],
+        [
+          0.47,
+          0.24
+        ],
+        [
+          0.22,
+          0.25
+        ]
+      ]
+    }
+  },
+  "turret": {
+    "id": "rock_thrower",
+    "name": "Rock Thrower",
+    "cost": 100,
+    "damage": 12,
+    "attackEvery": 1.5,
+    "range": 300,
+    "sellBack": 50,
+    "projectileSpeed": 420,
+    "slots": 3
+  },
+  "meteor": {
+    "cooldown": 60,
+    "count": 10,
+    "duration": 2.0,
+    "damage": 60,
+    "radius": 60
+  },
+  "units": [
+    {
+      "id": "clubman",
+      "name": "Clubman",
+      "cost": 50,
+      "trainTime": 1.5,
+      "hp": 100,
+      "damage": 18,
+      "attackEvery": 1.0,
+      "range": 20,
+      "speed": 40,
+      "killReward": 65,
+      "xp": 40,
+      "width": 48,
+      "sprite": "clubman",
+      "frameW": 406,
+      "frameH": 191,
+      "drawScale": 0.61,
+      "frames": {
+        "idle": 9,
+        "walk": 4,
+        "attack": 8,
+        "die": 5
+      },
+      "frameTimes": {
+        "idle": 0.16,
+        "walk": 0.25
+      }
+    },
+    {
+      "id": "slinger",
+      "name": "Slinger",
+      "cost": 75,
+      "trainTime": 2.0,
+      "hp": 70,
+      "damage": 14,
+      "attackEvery": 1.2,
+      "range": 160,
+      "speed": 38,
+      "killReward": 98,
+      "xp": 60,
+      "width": 40,
+      "projectileSpeed": 360,
+      "sprite": "slinger",
+      "frameW": 251,
+      "frameH": 191,
+      "drawScale": 0.56,
+      "frames": {
+        "idle": 14,
+        "walk": 4,
+        "attack": 6,
+        "die": 6
+      },
+      "frameTimes": {
+        "idle": 0.14,
+        "walk": 0.22
+      }
+    },
+    {
+      "id": "dinorider",
+      "name": "Dino Rider",
+      "cost": 200,
+      "trainTime": 4.0,
+      "hp": 360,
+      "damage": 40,
+      "attackEvery": 1.4,
+      "range": 24,
+      "speed": 55,
+      "killReward": 260,
+      "xp": 160,
+      "width": 64,
+      "sprite": "dinorider",
+      "frameW": 291,
+      "frameH": 195,
+      "drawScale": 0.7,
+      "frames": {
+        "idle": 8,
+        "walk": 8,
+        "attack": 6,
+        "die": 6
+      },
+      "frameTimes": {
+        "idle": 0.15,
+        "walk": 0.08
+      }
+    },
+    {
+      "id": "chief",
+      "name": "Chief",
+      "cost": 350,
+      "trainTime": 6.0,
+      "hp": 500,
+      "damage": 55,
+      "attackEvery": 1.5,
+      "range": 24,
+      "speed": 35,
+      "killReward": 455,
+      "xp": 280,
+      "width": 52,
+      "auraBonus": 0.1,
+      "auraRadius": 120,
+      "sprite": "chief",
+      "frameW": 336,
+      "frameH": 197,
+      "drawScale": 0.62,
+      "frames": {
+        "idle": 8,
+        "walk": 8,
+        "attack": 6,
+        "die": 6
+      },
+      "frameTimes": {
+        "idle": 0.15,
+        "walk": 0.12
+      }
+    }
+  ],
+  "ai": {
+    "easy": {
+      "income": 0.8,
+      "useMeteor": false,
+      "buyTurret": false,
+      "thinkEvery": 1.2
+    },
+    "normal": {
+      "income": 1.0,
+      "useMeteor": true,
+      "buyTurret": true,
+      "thinkEvery": 0.8
+    },
+    "hard": {
+      "income": 1.25,
+      "useMeteor": true,
+      "buyTurret": true,
+      "thinkEvery": 0.5
+    }
+  }
+}
