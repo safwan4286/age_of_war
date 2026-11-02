@@ -8,6 +8,7 @@ import 'package:hive_ce_flutter/hive_ce_flutter.dart';
 import 'resources/routes.dart';
 import 'resources/theme.dart';
 import 'services/game_data_service.dart';
+import 'services/responsiveness/device_manager.dart';
 import 'services/save_service.dart';
 
 Future<void> main() async {
@@ -38,16 +39,15 @@ class EpochClashApp extends StatelessWidget {
       initialRoute: Routes.menu,
       getPages: Routes.pages,
       defaultTransition: Transition.fadeIn,
-      // Games keep their own pixel sizes; cap system text scaling so the
-      // HUD never overflows the bottom bar.
+      // UI sizes scale with the screen (DeviceManager, `.sp`); system text
+      // scaling is capped so the HUD never overflows.
       builder: (context, child) {
         final mq = MediaQuery.of(context);
-        return MediaQuery(
-          data: mq.copyWith(
-            textScaler: mq.textScaler.clamp(maxScaleFactor: 1.3),
-          ),
-          child: child ?? const SizedBox.shrink(),
+        final data = mq.copyWith(
+          textScaler: mq.textScaler.clamp(maxScaleFactor: 1.15),
         );
+        DeviceManager.instance.initWith(data);
+        return MediaQuery(data: data, child: child ?? const SizedBox.shrink());
       },
     );
   }
@@ -56,8 +56,8 @@ class EpochClashApp extends StatelessWidget {
 void _registerLicences() {
   LicenseRegistry.addLicense(() async* {
     for (final (font, file) in [
-      ('Silkscreen', 'assets/fonts/OFL-Silkscreen.txt'),
-      ('Pixelify Sans', 'assets/fonts/OFL-PixelifySans.txt'),
+      ('Lilita One', 'assets/fonts/OFL-LilitaOne.txt'),
+      ('Nunito', 'assets/fonts/OFL-Nunito.txt'),
     ]) {
       final text = await rootBundle.loadString(file);
       yield LicenseEntryWithLineBreaks([font], text);

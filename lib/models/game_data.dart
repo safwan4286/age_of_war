@@ -34,6 +34,7 @@ class UnitDef {
     this.auraBonus = 0,
     this.auraRadius = 0,
     this.drawScale = 1,
+    this.headY = 0,
     this.frames = defaultFrames,
     this.frameTimes = const {},
   });
@@ -66,6 +67,10 @@ class UnitDef {
   /// World units per art pixel when drawn (frames come from the sheets
   /// at their own resolution; this sets how tall the unit stands).
   final double drawScale;
+
+  /// Height of the standing figure in world units (where the health bar
+  /// goes); 0 = use the frame height.
+  final double headY;
 
   /// Frames per animation strip. Units built from the 4-row sheets use
   /// the defaults; units assembled from separate frames can have more.
@@ -103,6 +108,7 @@ class UnitDef {
     auraBonus: m.dbl('auraBonus'),
     auraRadius: m.dbl('auraRadius'),
     drawScale: m.dbl('drawScale', 1),
+    headY: m.dbl('headY'),
     frames: {
       for (final e in defaultFrames.entries)
         e.key: m.sub('frames').integer(e.key, e.value),
@@ -194,6 +200,55 @@ class AiDef {
   );
 }
 
+/// What an upgrade improves.
+enum UpgradeTarget { melee, ranged, turret }
+
+enum UpgradeStat { damage, armor, range }
+
+/// A battle upgrade bought with gold, a few levels deep. Lasts for the
+/// battle (Age of War style). [per] is the bonus per level: +15% damage,
+/// -10% damage taken, +15% range.
+class UpgradeDef {
+  const UpgradeDef({
+    required this.id,
+    required this.name,
+    required this.desc,
+    required this.target,
+    required this.stat,
+    required this.per,
+    required this.costs,
+  });
+
+  final String id;
+  final String name;
+  final String desc;
+  final UpgradeTarget target;
+  final UpgradeStat stat;
+  final double per;
+
+  /// Cost of each level, in order; the list length is the level cap.
+  final List<int> costs;
+
+  int get maxLevel => costs.length;
+
+  static UpgradeDef? fromMap(Map<dynamic, dynamic> m) {
+    final target = UpgradeTarget.values.where((t) => t.name == m['target']).firstOrNull;
+    final stat = UpgradeStat.values.where((t) => t.name == m['stat']).firstOrNull;
+    final raw = m['costs'];
+    final costs = [if (raw is List) for (final c in raw) if (c is num) c.toInt()];
+    if (target == null || stat == null || costs.isEmpty || m.str('id').isEmpty) return null;
+    return UpgradeDef(
+      id: m.str('id'),
+      name: m.str('name', m.str('id')),
+      desc: m.str('desc'),
+      target: target,
+      stat: stat,
+      per: m.dbl('per', 0.1),
+      costs: costs,
+    );
+  }
+}
+
 /// Positions on the base picture, as fractions of its size (0,0 = top
 /// left, x from the rock side toward the lane). Measured per base art.
 class BaseArt {
@@ -201,6 +256,8 @@ class BaseArt {
     this.height = 300,
     this.gate = 0.56,
     this.slots = const [(0.86, 0.36), (0.55, 0.27), (0.28, 0.10)],
+    this.turretW = 0,
+    this.cliffFrom = 0,
   });
 
   /// Drawn height in world units; width follows the picture.
@@ -211,6 +268,14 @@ class BaseArt {
 
   /// Turret ledges: (x, y) of the spot a turret stands on.
   final List<(double, double)> slots;
+
+  /// Turret width as a fraction of the picture's width (sized to the
+  /// ledges); 0 = the layout default.
+  final double turretW;
+
+  /// The rock behind the base continues past the screen edge, repeated
+  /// from this x (fraction of the picture) outward.
+  final double cliffFrom;
 
   static BaseArt fromMap(Map<dynamic, dynamic> m) {
     final raw = m['slots'];
@@ -225,8 +290,24 @@ class BaseArt {
       height: m.dbl('height', d.height),
       gate: m.dbl('gate', d.gate),
       slots: slots.isEmpty ? d.slots : slots,
+      turretW: m.dbl('turretW'),
+      cliffFrom: m['cliff'] is List && (m['cliff'] as List).isNotEmpty && (m['cliff'] as List).first is num
+          ? ((m['cliff'] as List).first as num).toDouble()
+          : 0,
     );
   }
+}
+
+/// Where a background layer is drawn: [top] and [height] in world units
+/// (the world is 540 tall). Its width follows the picture.
+class LayerPlace {
+  const LayerPlace({this.top = 0, this.height = 540});
+
+  final double top;
+  final double height;
+
+  static LayerPlace fromMap(Map<dynamic, dynamic> m) =>
+      LayerPlace(top: m.dbl('top'), height: m.dbl('height', 540));
 }
 
 /// Everything balance-related, from one JSON file so tuning needs no code.
@@ -240,6 +321,8 @@ class GameData {
     required this.queueMax,
     this.popCap = 10,
     this.baseArt = const BaseArt(),
+    this.layers = const {},
+    this.upgrades = const [],
     required this.evolveXp,
     required this.baseHp,
     required this.turret,
@@ -266,6 +349,16 @@ class GameData {
 
   /// Where things sit on the base picture (view only).
   final BaseArt baseArt;
+
+  /// Background layer placement by name: sky, hills, near (view only).
+  final Map<String, LayerPlace> layers;
+
+  LayerPlace layer(String name) => layers[name] ?? const LayerPlace();
+
+  /// Battle upgrades, in the order the upgrade menu shows them.
+  final List<UpgradeDef> upgrades;
+
+  UpgradeDef? upgrade(String id) => upgrades.where((u) => u.id == id).firstOrNull;
   final int evolveXp;
   final double baseHp;
   final TurretDef turret;
@@ -295,11 +388,18 @@ class GameData {
       queueMax: eco.integer('queueMax', 5),
       popCap: eco.integer('popCap', 10),
       baseArt: BaseArt.fromMap(m.sub('base').sub('art')),
+      layers: {
+        for (final e in m.sub('world').sub('layers').entries)
+          if (e.value is Map) '${e.key}': LayerPlace.fromMap(e.value as Map),
+      },
       evolveXp: eco.integer('evolveXp', 4000),
       baseHp: m.sub('base').dbl('hp', 1000),
       turret: TurretDef.fromMap(m.sub('turret')),
       meteor: MeteorDef.fromMap(m.sub('meteor')),
       units: [for (final u in m.subs('units')) UnitDef.fromMap(u)],
+      upgrades: [
+        for (final u in m.subs('upgrades')) ?UpgradeDef.fromMap(u),
+      ],
       ai: {
         for (final d in Difficulty.values)
           if (ai[d.name] is Map) d: AiDef.fromMap(ai[d.name] as Map),

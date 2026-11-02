@@ -12,7 +12,7 @@ class MeteorView extends SpriteComponent {
   MeteorView(this.impact, this.sim, Sprite sprite)
     : super(
         sprite: sprite,
-        size: Vector2(72, 72 * sprite.srcSize.y / sprite.srcSize.x),
+        size: Vector2(110, 110 * sprite.srcSize.y / sprite.srcSize.x),
         anchor: Anchor.center,
         priority: 30,
       );
@@ -43,13 +43,13 @@ class MeteorView extends SpriteComponent {
   }
 }
 
-/// Six-frame explosion that removes itself when done.
+/// Explosion (square frames from fx/blast.png) that removes itself when done.
 class BlastView extends SpriteAnimationComponent {
   BlastView(SpriteAnimation animation, double x)
     : super(
         animation: animation,
         removeOnFinish: true,
-        size: Vector2.all(110),
+        size: Vector2.all(160),
         anchor: Anchor.bottomCenter,
         position: Vector2(x, Layout.groundY + 12),
         priority: 31,

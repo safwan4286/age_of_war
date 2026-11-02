@@ -16,6 +16,7 @@ Two layouts:
     ],
     "match": {"attack": [1, 6]},   # poses scaled to idle height (walk: all;
                                    # false = keep the sheet's own scale)
+    "scale": {"walk": 1.14},       # extra per-animation size correction
     "flip": {"die": [4]},          # mirror poses Gemini drew the wrong way round
     "synth": [{"anim": "idle", "from": 2, "stretchY": 1.02}],  # extra poses,
                                    # appended after the drawn ones (breathing)
@@ -184,6 +185,8 @@ def load_poses(spec_path: Path, spec: dict):
                 CELL_X0.setdefault(sh["anim"], []).extend(x for _, x in cells)
                 continue
             for name, ps in cut_rows(spec_path.parent / sh["file"], sh["rows"]):
+                if name.startswith("_"):  # a row this unit doesn't use
+                    continue
                 # Gemini draws each row at a slightly different size; with
                 # "rowMatch" every row of that animation is scaled to the
                 # first row's height so the figure doesn't pump.
@@ -272,6 +275,26 @@ def red_variant(img):
     return Image.fromarray(a.astype(np.uint8), "RGBA")
 
 
+def card(pose: Image.Image, size=160):
+    """Square head-and-shoulders portrait for the shop card (no ring)."""
+    a = np.asarray(pose)[..., 3] > 0
+    ys, xs = np.nonzero(a)
+    top, bot = ys.min(), ys.max()
+    h = bot - top
+    side = int(h * (0.42 if pose.width > pose.height * 1.3 else 0.5))
+    cols = np.nonzero(a[top: top + side // 2].any(0))[0]
+    cx = int(cols.mean())
+    x0 = max(0, cx - side // 2)
+    y0 = max(0, top - int(side * 0.06))
+    return pose.crop((x0, y0, x0 + side, y0 + side)).resize((size, size), Image.LANCZOS)
+
+
+def full_pose(pose: Image.Image, height=300):
+    """Whole figure, trimmed, for menus (difficulty cards)."""
+    p = pose.crop(pose.getchannel("A").getbbox())
+    return p.resize((max(1, round(p.width * height / p.height)), height), Image.LANCZOS)
+
+
 def medallion(pose: Image.Image, size=128):
     """Head-and-shoulders portrait in a stone ring."""
     w, h = pose.size
@@ -323,6 +346,9 @@ def main():
             row_k[name] = k * idle_h / med_h(ref)
         else:
             row_k[name] = k
+        # Hand correction when a sheet's framing differs (e.g. a video clip
+        # zoomed out to fit a long running pose): measured on the rider's head.
+        row_k[name] *= spec.get("scale", {}).get(name, 1.0)
 
     def shrink(img, f):
         q = img.resize((max(1, round(img.width * f)), max(1, round(img.height * f))), Image.LANCZOS)
@@ -382,6 +408,10 @@ def main():
     icons = root / "assets/images/icons"
     icons.mkdir(parents=True, exist_ok=True)
     medallion(poses["idle"][0][1]).save(icons / f"icon_{spec['sprite']}.png")
+    card(poses["idle"][0][1]).save(icons / f"card_{spec['sprite']}.png")
+    full = full_pose(poses["idle"][0][1])
+    full.save(icons / f"pose_{spec['sprite']}.png")
+    red_variant(full).save(icons / f"pose_{spec['sprite']}_red.png")
 
     data_path = root / "assets/data/units.json"
     data = json.loads(data_path.read_text())
@@ -394,6 +424,8 @@ def main():
             for key in ("drawScale", "width"):
                 if key in spec:
                     u[key] = spec[key]
+            # Top of the standing figure in world units (health bar sits above).
+            u["headY"] = round(spec["height"] * u.get("drawScale", 1))
     data_path.write_text(json.dumps(data, indent=2) + "\n")
     print(f"{spec['sprite']}: cell {cw}x{ch}, frames {counts}")
 

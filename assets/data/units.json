@@ -1,7 +1,7 @@
 {
   "version": 1,
   "lane": {
-    "length": 1600,
+    "length": 1800,
     "baseWidth": 120,
     "spawnGap": 26
   },
@@ -15,22 +15,28 @@
   "base": {
     "hp": 1000,
     "art": {
-      "_note": "Placeholder cave art; re-measure when the cliff base arrives.",
-      "height": 280,
-      "gate": 0.56,
+      "_note": "Measured from tools/art/source/stone_world/stone_base.png by build_world.py.",
+      "height": 330,
+      "gate": 0.812,
       "slots": [
         [
-          0.86,
-          0.36
+          0.83,
+          0.665
         ],
         [
-          0.47,
-          0.24
+          0.451,
+          0.536
         ],
         [
-          0.22,
-          0.25
+          0.375,
+          0.341
         ]
+      ],
+      "ledgeW": 0.281,
+      "turretW": 0.225,
+      "cliff": [
+        0.07,
+        0.07
       ]
     }
   },
@@ -79,7 +85,8 @@
       "frameTimes": {
         "idle": 0.16,
         "walk": 0.25
-      }
+      },
+      "headY": 110
     },
     {
       "id": "slinger",
@@ -100,15 +107,16 @@
       "frameH": 191,
       "drawScale": 0.56,
       "frames": {
-        "idle": 14,
-        "walk": 4,
+        "idle": 8,
+        "walk": 8,
         "attack": 6,
         "die": 6
       },
       "frameTimes": {
-        "idle": 0.14,
-        "walk": 0.22
-      }
+        "idle": 0.15,
+        "walk": 0.12
+      },
+      "headY": 101
     },
     {
       "id": "dinorider",
@@ -122,11 +130,11 @@
       "speed": 55,
       "killReward": 260,
       "xp": 160,
-      "width": 64,
+      "width": 72,
       "sprite": "dinorider",
-      "frameW": 291,
-      "frameH": 195,
-      "drawScale": 0.7,
+      "frameW": 310,
+      "frameH": 206,
+      "drawScale": 0.78,
       "frames": {
         "idle": 8,
         "walk": 8,
@@ -136,7 +144,8 @@
       "frameTimes": {
         "idle": 0.15,
         "walk": 0.08
-      }
+      },
+      "headY": 148
     },
     {
       "id": "chief",
@@ -166,7 +175,8 @@
       "frameTimes": {
         "idle": 0.15,
         "walk": 0.12
-      }
+      },
+      "headY": 118
     }
   ],
   "ai": {
@@ -188,5 +198,102 @@
       "buyTurret": true,
       "thinkEvery": 0.5
     }
-  }
+  },
+  "world": {
+    "bgFromSheets": true,
+    "layers": {
+      "sky": {
+        "top": -140,
+        "height": 690
+      },
+      "hills": {
+        "top": 0,
+        "height": 540
+      },
+      "near": {
+        "top": 160,
+        "height": 420
+      }
+    }
+  },
+  "upgrades": [
+    {
+      "id": "melee_damage",
+      "name": "Sharper Clubs",
+      "desc": "Clubmen, Dino Riders and Chiefs hit harder.",
+      "target": "melee",
+      "stat": "damage",
+      "per": 0.15,
+      "costs": [
+        150,
+        300,
+        600
+      ]
+    },
+    {
+      "id": "melee_armor",
+      "name": "Thick Hides",
+      "desc": "Your melee units take less damage.",
+      "target": "melee",
+      "stat": "armor",
+      "per": 0.1,
+      "costs": [
+        150,
+        300,
+        600
+      ]
+    },
+    {
+      "id": "ranged_damage",
+      "name": "Heavier Stones",
+      "desc": "Slingers hit harder.",
+      "target": "ranged",
+      "stat": "damage",
+      "per": 0.15,
+      "costs": [
+        120,
+        240,
+        480
+      ]
+    },
+    {
+      "id": "ranged_armor",
+      "name": "Bone Charms",
+      "desc": "Slingers take less damage.",
+      "target": "ranged",
+      "stat": "armor",
+      "per": 0.1,
+      "costs": [
+        120,
+        240,
+        480
+      ]
+    },
+    {
+      "id": "turret_damage",
+      "name": "Bigger Boulders",
+      "desc": "Rock Throwers hit harder.",
+      "target": "turret",
+      "stat": "damage",
+      "per": 0.2,
+      "costs": [
+        150,
+        300,
+        600
+      ]
+    },
+    {
+      "id": "turret_range",
+      "name": "Longer Arms",
+      "desc": "Rock Throwers reach further.",
+      "target": "turret",
+      "stat": "range",
+      "per": 0.15,
+      "costs": [
+        120,
+        240,
+        480
+      ]
+    }
+  ]
 }

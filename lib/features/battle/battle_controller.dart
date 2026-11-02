@@ -10,7 +10,7 @@ import '../../services/sim/battle_sim.dart';
 import '../../services/sim/enemy_ai.dart';
 import 'game/battle_game.dart';
 
-enum BattleOverlay { none, tutorial, paused, evolveTeaser, turrets }
+enum BattleOverlay { none, tutorial, paused, evolveTeaser, turrets, upgrades }
 
 /// Owns one battle: the sim, the enemy AI and the Flame view. The HUD
 /// reads the Rx values below, refreshed about 10 times a second.
@@ -41,6 +41,9 @@ class BattleController extends GetxController {
   final meteorFraction = 0.0.obs;
   /// One entry per turret ledge: built or empty.
   final turrets = <bool>[].obs;
+
+  /// Upgrade id -> level bought this battle.
+  final upgrades = <String, int>{}.obs;
   final population = 0.obs;
   final seconds = 0.obs;
   final speed = 1.obs;
@@ -110,6 +113,7 @@ class BattleController extends GetxController {
         : 1 - (me.trainLeft / me.queue.first.trainTime).clamp(0.0, 1.0);
     meteorFraction.value = sim.meteorFraction(Side.player);
     if (!_sameBools(me.turrets, turrets)) turrets.assignAll(me.turrets);
+    if (!_sameLevels(me.upgrades, upgrades)) upgrades.assignAll(me.upgrades);
     population.value = sim.population(Side.player);
     seconds.value = sim.time.floor();
   }
@@ -118,6 +122,14 @@ class BattleController extends GetxController {
     if (a.length != b.length) return false;
     for (var i = 0; i < a.length; i++) {
       if (a[i] != b[i]) return false;
+    }
+    return true;
+  }
+
+  static bool _sameLevels(Map<String, int> a, Map<String, int> b) {
+    if (a.length != b.length) return false;
+    for (final e in a.entries) {
+      if (b[e.key] != e.value) return false;
     }
     return true;
   }
@@ -195,6 +207,27 @@ class BattleController extends GetxController {
   /// Opens the ledge picker (the battle waits meanwhile).
   void openTurrets() => _open(BattleOverlay.turrets);
 
+  /// Opens the upgrade menu (the battle waits meanwhile).
+  void openUpgrades() => _open(BattleOverlay.upgrades);
+
+  int upgradeLevel(String id) => upgrades[id] ?? 0;
+
+  /// Gold for [id]'s next level, null when maxed.
+  int? upgradeCost(String id) => sim.upgradeCost(Side.player, id);
+
+  /// True when there's an upgrade the player can buy right now (lights
+  /// the HUD button).
+  bool get canUpgrade => data.upgrades.any((u) {
+    final c = sim.upgradeCost(Side.player, u.id);
+    return c != null && gold.value >= c;
+  });
+
+  void buyUpgrade(String id) {
+    final ok = sim.buyUpgrade(Side.player, id);
+    _buzz(ok ? HapticFeedback.mediumImpact : HapticFeedback.vibrate);
+    _refresh();
+  }
+
   void buildTurret(int slot) {
     final ok = sim.buyTurret(Side.player, slot);
     _buzz(ok ? HapticFeedback.mediumImpact : HapticFeedback.vibrate);
@@ -231,6 +264,10 @@ class BattleController extends GetxController {
   }
 
   void pan(double dx) => game.panBy(dx);
+
+  void panStart() => game.panStart();
+
+  void panEnd() => game.panEnd();
 
   // ---------------------------------------------------------- overlays
 

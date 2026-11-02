@@ -28,23 +28,51 @@ class _ScenicBackdropState extends State<ScenicBackdrop>
     super.dispose();
   }
 
-  Widget _layer(String path, double travel) {
-    return AnimatedBuilder(
-      animation: _drift,
-      builder: (context, child) => FractionalTranslation(
-        translation: Offset(-_drift.value * travel, 0),
-        child: child,
-      ),
-      child: OverflowBox(
-        maxWidth: double.infinity,
-        alignment: Alignment.centerLeft,
-        child: Image.asset(
-          'assets/images/$path',
-          fit: BoxFit.fitHeight,
-          height: double.infinity,
-          filterQuality: FilterQuality.none,
-        ),
-      ),
+  /// One layer drawn at a fraction of the screen height ([top] and
+  /// [height] as fractions), drifting sideways by [travel] of its width.
+  Widget _layer(String path, double travel, {double top = 0, double height = 1}) {
+    return LayoutBuilder(
+      builder: (context, box) {
+        final h = box.maxHeight * height;
+        return Stack(
+          children: [
+            Positioned(
+              left: 0,
+              right: 0,
+              top: box.maxHeight * top,
+              height: h,
+              child: AnimatedBuilder(
+                animation: _drift,
+                builder: (context, child) => FractionalTranslation(
+                  translation: Offset(-_drift.value * travel, 0),
+                  child: child,
+                ),
+                // Repeated with every other copy mirrored, like the
+                // battlefield, so any screen width is covered seamlessly.
+                child: OverflowBox(
+                  maxWidth: double.infinity,
+                  alignment: Alignment.centerLeft,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      for (var k = 0; k < 4; k++)
+                        Transform.flip(
+                          flipX: k.isOdd,
+                          child: Image.asset(
+                            'assets/images/$path',
+                            height: h,
+                            fit: BoxFit.fitHeight,
+                            filterQuality: FilterQuality.medium,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -55,9 +83,10 @@ class _ScenicBackdropState extends State<ScenicBackdrop>
       child: Stack(
         fit: StackFit.expand,
         children: [
-          _layer(Img.bgSky, 0.03),
-          _layer(Img.bgHills, 0.08),
-          _layer(Img.bgNear, 0.16),
+          // Same proportions as the battlefield's layers (units.json world).
+          _layer(Img.bgSky, 0.03, top: -0.05, height: 1.1),
+          _layer(Img.bgHills, 0.08, height: 1.0),
+          _layer(Img.bgNear, 0.16, top: 0.3, height: 0.74),
           ColoredBox(color: Pal.ink.withValues(alpha: widget.scrim)),
           widget.child,
         ],

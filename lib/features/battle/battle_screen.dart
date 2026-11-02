@@ -37,7 +37,10 @@ class BattleScreen extends GetView<BattleController> {
             Positioned.fill(
               child: GestureDetector(
                 behavior: HitTestBehavior.translucent,
+                onHorizontalDragStart: (_) => c.panStart(),
                 onHorizontalDragUpdate: (d) => c.pan(d.delta.dx),
+                onHorizontalDragEnd: (_) => c.panEnd(),
+                onHorizontalDragCancel: c.panEnd,
               ),
             ),
             // HUD lives in the corners, AoW-style, so the plain stays clear.

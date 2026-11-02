@@ -58,9 +58,49 @@ class EnemyAi {
       sim.buyTurret(me);
       return;
     }
+    if (_upgrade()) return;
     if (st.queue.length >= maxQueue) return;
     final pick = choose();
     if (pick != null) sim.queueUnit(me, pick);
+  }
+
+  /// When the AI starts buying upgrades and how much gold it keeps for
+  /// units on top of the price. Easy never upgrades.
+  double? get upgradeAfter => switch (level) {
+    Difficulty.easy => null,
+    Difficulty.normal => 90,
+    Difficulty.hard => 45,
+  };
+
+  double get upgradeReserve => level == Difficulty.hard ? 200 : 350;
+
+  /// Order the AI upgrades in: its army first, then its turrets.
+  static const upgradeOrder = [
+    'melee_damage',
+    'melee_armor',
+    'ranged_damage',
+    'turret_damage',
+    'ranged_armor',
+    'turret_range',
+  ];
+
+  /// Buys the cheapest next upgrade level it can afford with gold to spare
+  /// (never while under pressure: units first then).
+  bool _upgrade() {
+    final after = upgradeAfter;
+    if (after == null || sim.time < after || underThreat(350)) return false;
+    String? best;
+    int? bestCost;
+    for (final id in upgradeOrder) {
+      final cost = sim.upgradeCost(me, id);
+      if (cost == null) continue;
+      if (bestCost == null || cost < bestCost) {
+        best = id;
+        bestCost = cost;
+      }
+    }
+    if (best == null || sim[me].gold < bestCost! + upgradeReserve) return false;
+    return sim.buyUpgrade(me, best);
   }
 
   /// The other side's living units on our half of the lane.

@@ -43,7 +43,8 @@ class UnitAnims {
   }
 }
 
-/// Mirrors one [SimUnit]: position, animation, hit flash, health bar.
+/// Mirrors one [SimUnit]: position, animation, hit flash. Its health bar
+/// is a separate component on a top layer, so other units never cover it.
 class UnitView extends PositionComponent {
   UnitView(this.unit, this.anims)
     : super(
@@ -55,14 +56,10 @@ class UnitView extends PositionComponent {
   final SimUnit unit;
   final UnitAnims anims;
   late final SpriteAnimationGroupComponent<UnitState> _sprite;
+  late final HealthBar _bar = HealthBar(unit, anims);
   double _flash = 0;
 
-  static final _barBack = Paint()..color = const Color(0xCC0F1720);
-  static final _barPlayer = Paint()..color = const Color(0xFF7BC86C);
-  static final _barEnemy = Paint()..color = const Color(0xFFD9553B);
   static const _white = ColorFilter.mode(Color(0xFFFFFFFF), BlendMode.srcATop);
-
-  double get _drawH => anims.drawSize.y;
 
   @override
   Future<void> onLoad() async {
@@ -77,7 +74,22 @@ class UnitView extends PositionComponent {
     add(_sprite);
   }
 
-  void flash() => _flash = 0.08;
+  @override
+  void onMount() {
+    super.onMount();
+    parent?.add(_bar);
+  }
+
+  @override
+  void onRemove() {
+    _bar.removeFromParent();
+    super.onRemove();
+  }
+
+  void flash() {
+    _flash = 0.08;
+    _bar.show();
+  }
 
   @override
   void update(double dt) {
@@ -93,16 +105,63 @@ class UnitView extends PositionComponent {
       _sprite.opacity = (1 - (t - 0.6) / 0.4).clamp(0.0, 1.0);
     }
   }
+}
+
+/// Health bar over a unit's head, Age of War style: outlined, shows once
+/// the unit is hurt, with a pale "recent damage" trail that drains after
+/// the real value.
+class HealthBar extends PositionComponent {
+  HealthBar(this.unit, this.anims) : super(priority: 34, anchor: Anchor.bottomCenter);
+
+  final SimUnit unit;
+  final UnitAnims anims;
+  double _shown = 1;
+  double _trail = 1;
+  double _visible = 0;
+
+  static const double w = 46, h = 7;
+  static final _back = Paint()..color = const Color(0xFF1E140C);
+  static final _ink = Paint()
+    ..color = const Color(0xFF2B1B10)
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = 2;
+  static final _trailPaint = Paint()..color = const Color(0xFFFFF3D6);
+  static final _player = Paint()..color = const Color(0xFF7CC843);
+  static final _enemy = Paint()..color = const Color(0xFFE0482F);
+
+  void show() => _visible = 1;
+
+  double get _headY => unit.def.headY > 0 ? unit.def.headY : anims.drawSize.y * 0.8;
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+    position.setValues(unit.x, Layout.groundY - _headY - 8);
+    final v = unit.hpFraction;
+    _shown = v;
+    // The trail waits a moment, then drains to the real value.
+    if (_trail > v) {
+      _trail = (_trail - dt * 0.6).clamp(v, 1.0);
+    } else {
+      _trail = v;
+    }
+    if (v < 1 && unit.alive) _visible = 1;
+    if (!unit.alive) _visible = (_visible - dt * 4).clamp(0.0, 1.0);
+  }
 
   @override
   void render(Canvas canvas) {
-    if (!unit.alive || unit.hp >= unit.def.hp) return;
-    const w = 34.0, h = 5.0;
-    final top = -_drawH * 0.78;
-    canvas.drawRect(Rect.fromLTWH(-w / 2 - 1, top - 1, w + 2, h + 2), _barBack);
-    canvas.drawRect(
-      Rect.fromLTWH(-w / 2, top, w * unit.hpFraction, h),
-      unit.side == Side.player ? _barPlayer : _barEnemy,
-    );
+    if (_visible <= 0) return;
+    final a = (_visible * 255).round();
+    final r = RRect.fromRectAndRadius(Rect.fromLTWH(-w / 2, -h, w, h), const Radius.circular(h / 2));
+    canvas.saveLayer(r.outerRect.inflate(2), Paint()..color = Color.fromARGB(a, 255, 255, 255));
+    canvas.drawRRect(r, _back);
+    canvas.save();
+    canvas.clipRRect(r);
+    canvas.drawRect(Rect.fromLTWH(-w / 2, -h, w * _trail, h), _trailPaint);
+    canvas.drawRect(Rect.fromLTWH(-w / 2, -h, w * _shown, h), unit.side == Side.player ? _player : _enemy);
+    canvas.restore();
+    canvas.drawRRect(r, _ink);
+    canvas.restore();
   }
 }

@@ -103,6 +103,9 @@ class SideState {
   final List<bool> turrets;
   final List<double> turretCooldowns;
   double meteorCharge = 0;
+
+  /// Upgrade id -> level bought this battle.
+  final Map<String, int> upgrades = {};
   int kills = 0;
   int goldEarned = 0;
 
@@ -121,6 +124,7 @@ enum SimEventType {
   meteorImpact,
   turretBought,
   turretSold,
+  upgraded,
   gameOver,
 }
 
@@ -253,6 +257,52 @@ class BattleSim {
     _events.add(SimEvent(SimEventType.turretSold, s, unitId: slot));
     return true;
   }
+
+  // ------------------------------------------------------------ upgrades
+
+  int upgradeLevel(Side s, String id) => this[s].upgrades[id] ?? 0;
+
+  /// Gold for the next level of [id], or null when maxed or unknown.
+  int? upgradeCost(Side s, String id) {
+    final u = data.upgrade(id);
+    if (u == null) return null;
+    final lvl = upgradeLevel(s, id);
+    return lvl >= u.maxLevel ? null : u.costs[lvl];
+  }
+
+  /// Buys the next level of upgrade [id].
+  bool buyUpgrade(Side s, String id) {
+    final cost = upgradeCost(s, id);
+    final st = this[s];
+    if (outcome != null || cost == null || st.gold < cost) return false;
+    st.gold -= cost;
+    st.upgrades[id] = upgradeLevel(s, id) + 1;
+    _events.add(SimEvent(SimEventType.upgraded, s, amount: st.upgrades[id]!.toDouble()));
+    return true;
+  }
+
+  /// Total bonus a side has for [target]/[stat] (0.3 = +30%).
+  double bonus(Side s, UpgradeTarget target, UpgradeStat stat) {
+    var b = 0.0;
+    for (final u in data.upgrades) {
+      if (u.target == target && u.stat == stat) b += u.per * upgradeLevel(s, u.id);
+    }
+    return b;
+  }
+
+  UpgradeTarget _classOf(UnitDef d) => d.ranged ? UpgradeTarget.ranged : UpgradeTarget.melee;
+
+  /// A unit's damage per hit with its side's upgrades.
+  double unitDamage(SimUnit u) =>
+      u.def.damage * (1 + bonus(u.side, _classOf(u.def), UpgradeStat.damage));
+
+  /// Share of incoming damage a unit still takes (armor upgrades).
+  double damageTaken(SimUnit u) =>
+      (1 - bonus(u.side, _classOf(u.def), UpgradeStat.armor)).clamp(0.2, 1.0);
+
+  double turretDamage(Side s) => data.turret.damage * (1 + bonus(s, UpgradeTarget.turret, UpgradeStat.damage));
+
+  double turretRange(Side s) => data.turret.range * (1 + bonus(s, UpgradeTarget.turret, UpgradeStat.range));
 
   /// Rains meteors over the other side's army (only its units get hurt).
   /// With no army on the lane, the rocks fall on the other side's half.
@@ -454,7 +504,7 @@ class BattleSim {
     u.cooldown -= dt;
     if (u.cooldown > 0) return;
     u.cooldown += u.def.attackEvery;
-    final dmg = u.def.damage * _auraMultiplier(u);
+    final dmg = unitDamage(u) * _auraMultiplier(u);
     _events.add(SimEvent(SimEventType.attack, u.side, unitId: u.id, x: u.x));
     if (u.def.ranged) {
       _shoot(
@@ -477,10 +527,11 @@ class BattleSim {
     final st = this[s];
     if (!st.hasTurret) return;
     final front = frontOf(s);
+    final range = turretRange(s);
     SimUnit? best;
     for (final e in aliveOf(s.other)) {
       final d = (e.x - front).abs();
-      if (d > data.turret.range) continue;
+      if (d > range) continue;
       if (best == null || d < (best.x - front).abs()) best = e;
     }
     for (var i = 0; i < st.turrets.length; i++) {
@@ -497,7 +548,7 @@ class BattleSim {
         fromX: front,
         targetX: best.x,
         targetId: best.id,
-        damage: data.turret.damage,
+        damage: turretDamage(s),
         speed: data.turret.projectileSpeed,
         slot: i,
       );
@@ -573,6 +624,7 @@ class BattleSim {
 
   void _damageUnit(SimUnit t, double amount, {required Side by}) {
     if (!t.alive) return;
+    amount *= damageTaken(t);
     t.hp -= amount;
     _events.add(SimEvent(SimEventType.hit, t.side, unitId: t.id, x: t.x, amount: amount));
     if (t.hp > 0) return;

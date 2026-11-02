@@ -8,6 +8,12 @@ class Layout {
 
   static const double worldH = 540;
 
+  /// What the camera shows vertically: more than the 540-tall art
+  /// (zoomed out ~28%, units about Age of War size). The sky and ground
+  /// layers extend to cover it.
+  static const double viewH = 690;
+  static const double viewTop = -110;
+
   /// Back edge of the ground plain, where the jungle meets the sand.
   static const double horizonY = 335;
 
@@ -20,13 +26,16 @@ class Layout {
   /// Turret width on a ledge; height follows the art.
   static const double turretW = 76;
 
-  /// Background layers: 32:9 art drawn at 1920x540, starting a bit
-  /// before the player's base so the edges never show.
-  static const double bgW = 1920;
+  /// Background layers repeat sideways (every other copy mirrored, so any
+  /// picture joins without a seam), drawn 540 tall at their own aspect.
+  /// This is where the first copy starts.
   static const double bgLeft = -160;
 
-  /// The camera may look this far past either base.
-  static const double camMargin = 40;
+  /// The camera rests showing the whole base plus this much behind it.
+  static const double camMargin = 30;
+
+  /// How far a drag can pull past either end before it springs back.
+  static const double overscroll = 110;
 
   /// Where slingers release and where shots land.
   static const double slingY = groundY - 52;

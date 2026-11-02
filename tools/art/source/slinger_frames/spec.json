@@ -5,11 +5,14 @@
   "width": 40,
   "sheets": [
     {
-      "file": "slinger_walk.png",
-      "rows": [
-        "walk",
-        "walk"
-      ]
+      "file": "slinger_idle_frames.png",
+      "cell": 640,
+      "anim": "idle"
+    },
+    {
+      "file": "slinger_walk_frames.png",
+      "cell": 640,
+      "anim": "walk"
     },
     {
       "file": "slinger_attack.png",
@@ -22,38 +25,40 @@
       "file": "slinger_death_idle.png",
       "rows": [
         "die",
-        "idle"
+        "_old_idle"
       ]
     }
   ],
   "match": {
+    "walk": false,
     "attack": [
       1,
       6
+    ],
+    "die": [
+      1
     ]
   },
   "play": {
     "idle": [
-      2,
-      5,
-      6,
-      6,
-      5,
-      2,
-      2,
-      5,
-      6,
-      6,
-      5,
+      1,
       2,
       3,
-      2
+      4,
+      5,
+      6,
+      7,
+      8
     ],
     "walk": [
       1,
+      2,
       3,
+      4,
       5,
-      6
+      6,
+      7,
+      8
     ],
     "attack": [
       1,
@@ -73,8 +78,8 @@
     ]
   },
   "frameTimes": {
-    "idle": 0.14,
-    "walk": 0.22
+    "idle": 0.15,
+    "walk": 0.12
   },
   "flip": {
     "die": [
@@ -82,22 +87,7 @@
     ]
   },
   "dieAnchor": "front",
-  "synth": [
-    {
-      "anim": "idle",
-      "from": 2,
-      "stretchY": 1.01
-    },
-    {
-      "anim": "idle",
-      "from": 2,
-      "stretchY": 1.02
-    }
-  ],
-  "rowMatch": [
-    "walk"
-  ],
-  "anchor": {
-    "walk": "body"
+  "scale": {
+    "walk": 0.95
   }
 }

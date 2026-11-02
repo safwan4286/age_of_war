@@ -37,11 +37,9 @@ flutter:
 
   fonts:
     # Both SIL Open Font License 1.1 (assets/fonts/OFL-*.txt).
-    - family: Silkscreen
+    - family: LilitaOne
       fonts:
-        - asset: assets/fonts/Silkscreen-Regular.ttf
-        - asset: assets/fonts/Silkscreen-Bold.ttf
-          weight: 700
-    - family: PixelifySans
+        - asset: assets/fonts/LilitaOne-Regular.ttf
+    - family: Nunito
       fonts:
-        - asset: assets/fonts/PixelifySans.ttf
+        - asset: assets/fonts/Nunito.ttf

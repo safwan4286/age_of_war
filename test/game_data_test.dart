@@ -1,3 +1,4 @@
+import 'package:epoch_clash/features/battle/game/world_layout.dart';
 import 'package:epoch_clash/models/game_data.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -24,10 +25,10 @@ void main() {
       expect(data.unit('chief').frameCount('die'), 6);
       expect(data.unit('clubman').frameCount('walk'), 4);
       expect(data.unit('clubman').frameTime('walk', 0.1), 0.25);
-      // Built from the 3-sheet layout: 4 of the 8 walk poses, 6-frame attack.
-      expect(data.unit('slinger').frameCount('walk'), 4);
+      // Walk and idle from video frames, attack and death from Gemini sheets.
+      expect(data.unit('slinger').frameCount('walk'), 8);
       expect(data.unit('slinger').frameCount('attack'), 6);
-      expect(data.unit('slinger').frameTime('walk', 0.1), 0.22);
+      expect(data.unit('slinger').frameTime('walk', 0.1), 0.12);
     });
 
     test('kill rewards are about 1.3x cost', () {
@@ -51,6 +52,16 @@ void main() {
         expect(y, inInclusiveRange(0, 1));
       }
       expect(data.popCap, 10);
+      expect(data.baseArt.turretW, inInclusiveRange(0.1, 0.4));
+    });
+
+    test('background layers cover the zoomed-out camera view', () {
+      // The sky reaches above the view, the ground below it.
+      expect(data.layer('sky').top, lessThanOrEqualTo(Layout.viewTop));
+      final near = data.layer('near');
+      expect(near.top + near.height, greaterThanOrEqualTo(Layout.viewTop + Layout.viewH));
+      expect(data.laneLength, 1800);
+      expect(data.layer('missing').height, 540);
     });
 
     test('economy, turret and meteor values', () {

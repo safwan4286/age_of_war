@@ -16,7 +16,7 @@ class FloatingText extends TextComponent {
             fontFamily: AppFonts.display,
             fontSize: size,
             color: color,
-            shadows: const [Shadow(color: Pal.ink, offset: Offset(1, 2))],
+            shadows: AppTheme.outline(size),
           ),
         ),
       );

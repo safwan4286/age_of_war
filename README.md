@@ -38,7 +38,8 @@ pick a signing team. Bundle / application id: `app.epochclash.game`.
   `units.json`. Done: Clubman (single all-states sheet), Slinger (3 sheets).
 - **Frames exported from an AI video tool** (one transparent strip per animation, equal square frames)
   go in the same spec as `{"file": ..., "cell": 640, "anim": "walk"}`; those frames keep their own
-  positions (one camera). Chief and Dino Rider: idle, walk and death from video frames, attack from a Gemini sheet.
+  positions (one camera). Slinger: idle and walk from video frames, attack and death from Gemini (a row named `_...` is skipped).
+  Chief and Dino Rider: idle, walk and death from video frames, attack from a Gemini sheet.
   `"match": {"walk": false}` keeps a sheet at its own scale (the running raptor is lower than it stands).
 
 - **Units**: your Gemini sheets in `tools/art/source/` → `python3 tools/art/slice_sheets.py tools/art/source .`
@@ -51,6 +52,35 @@ pick a signing team. Bundle / application id: `app.epochclash.game`.
   `python3 tools/art/gen_placeholders.py .` fills only files that don't exist yet.
 - Order when regenerating: `slice_sheets.py` → `process_assets.py` → `gen_placeholders.py`.
 - `python3 tools/check_assets.py` verifies every path and strip size.
+
+- **World (current)**: Gemini sheets in `tools/art/source/stone_world/` → `python3 tools/art/build_world.py .`
+  keys the magenta, removes the sparkle and edge lines, turns purple smoke grey, finds the base's
+  3 plank ledges and its gate and writes them to `units.json` (`base.art`), sizes the turret to the
+  ledges, and cuts the effects grid. The rock past the screen edge is `bases/stone_cliff.png`, repeated
+  mirrored by the game: from `stone_world/stone_cliff.png` when that sheet exists, else a strip of the base. Layer placement is `units.json` → `world.layers`
+  (sky, hills, near: top and height in world units). Background layers are rebuilt from the sheets when
+  `world.bgFromSheets` is true: the previous layout redrawn in the unit style (sky, meadow hills, hedge + sand plain).
+  The meteor impact comes from `stone_world/stone_blast.png` (3x2 fire-to-smoke frames). HUD icons
+  (gold, XP, meteor, evolve, turret, stars, lock) come from `stone_world/stone_icons.png` (4x2 grid).
+  The previous art is in `tools/art/source/old_world/`.
+
+## Upgrades
+
+- Six battle upgrades in `units.json` → `upgrades` (melee/ranged damage and armor, turret damage and
+  range), three levels each, lasting for the battle. The sim applies them (`BattleSim.unitDamage`,
+  `damageTaken`, `turretDamage`, `turretRange`); the HUD's muscle button opens the menu.
+- The AI upgrades too: Hard after 45 s, Normal after 90 s, Easy never; only with gold to spare and
+  not while under attack. Tests: `test/upgrade_test.dart`.
+
+## UI and screen sizes
+
+- Look: "stone & ember" cartoon UI drawn in code (`lib/widgets/game_ui.dart`): stone panels, glossy
+  outlined buttons (`GameTone.gold/stone/ember/leaf`), rounded bars. Fonts: Lilita One (titles,
+  buttons, numbers) and Nunito (sentences), both OFL.
+- Responsive like Kindose: `DeviceManager` + `.sp` (`lib/services/responsiveness/`), reference
+  800x380 landscape, scale clamped 0.82-1.25, system text scale capped at 1.15. The shared widgets
+  take design units and scale themselves; screens use `.sp` for raw sizes. `FitScreen` lays a
+  screen out at a max width and scales it down on short phones, so nothing overflows.
 
 ## Layout (matches the art bible)
 
@@ -67,4 +97,3 @@ pick a signing team. Bundle / application id: `app.epochclash.game`.
 - Evolve shows a "Medieval coming soon" teaser.
 - Two equal AIs can stall at mid-lane; humans break it with meteor timing. Watch for stalls in playtests.
 - Dino Rider sheet: attack frame 6 and die frame 1 were broken in the source; the slicer reuses neighbouring frames.
-# age_of_war

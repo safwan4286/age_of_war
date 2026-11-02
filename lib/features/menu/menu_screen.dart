@@ -3,7 +3,8 @@ import 'package:get/get.dart';
 
 import '../../resources/assets.dart';
 import '../../resources/theme.dart';
-import '../../widgets/pixel_box.dart';
+import '../../services/responsiveness/device_manager.dart';
+import '../../widgets/game_ui.dart';
 import '../../widgets/scenic_backdrop.dart';
 import 'menu_controller.dart';
 
@@ -15,33 +16,44 @@ class MenuScreen extends GetView<MenuController> {
     final c = controller;
     return Scaffold(
       body: ScenicBackdrop(
+        scrim: 0.25,
         child: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
+          child: Padding(
+            padding: EdgeInsets.all(12.sp),
+            child: FitScreen(
+              maxWidth: 520,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  _Title(),
-                  const SizedBox(height: 28),
-                  PixelButton(label: 'PLAY', onTap: c.play, width: 260, height: 64, fontSize: 26),
-                  const SizedBox(height: 14),
-                  PixelButton(
+                  const _Title(),
+                  SizedBox(height: 22.sp),
+                  GameButton(label: 'PLAY', onTap: c.play, width: 300, height: 72, fontSize: 38),
+                  SizedBox(height: 14.sp),
+                  GameButton(
                     label: 'SETTINGS',
                     onTap: c.openSettings,
-                    width: 260,
-                    color: Pal.panelHi,
-                    textColor: Pal.cream,
+                    tone: GameTone.stone,
+                    width: 300,
+                    height: 58,
+                    fontSize: 26,
                   ),
-                  const SizedBox(height: 18),
+                  SizedBox(height: 16.sp),
                   Obx(
-                    () => Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const PixelImage(UiImg.star, size: 22),
-                        const SizedBox(width: 6),
-                        Text('${c.totalStars.value} / 9', style: AppTheme.display(16)),
-                      ],
+                    () => Container(
+                      padding: EdgeInsets.symmetric(horizontal: 14.sp, vertical: 6.sp),
+                      decoration: BoxDecoration(
+                        color: Pal.shade,
+                        borderRadius: BorderRadius.circular(20.sp),
+                        border: Border.all(color: Pal.ink, width: 2.sp),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const GameImage(UiImg.star, size: 24),
+                          SizedBox(width: 8.sp),
+                          Text('${c.totalStars.value} / 9', style: AppTheme.display(20)),
+                        ],
+                      ),
                     ),
                   ),
                 ],
@@ -55,6 +67,8 @@ class MenuScreen extends GetView<MenuController> {
 }
 
 class _Title extends StatefulWidget {
+  const _Title();
+
   @override
   State<_Title> createState() => _TitleState();
 }
@@ -76,24 +90,35 @@ class _TitleState extends State<_Title> with SingleTickerProviderStateMixin {
     return AnimatedBuilder(
       animation: _bob,
       builder: (context, child) => Transform.translate(
-        offset: Offset(0, -4 * Curves.easeInOut.transform(_bob.value)),
+        offset: Offset(0, -4.sp * Curves.easeInOut.transform(_bob.value)),
         child: child,
       ),
       child: Column(
         children: [
-          Text(
-            'EPOCH CLASH',
-            textAlign: TextAlign.center,
-            style: AppTheme.display(54, color: Pal.amber).copyWith(
-              fontWeight: FontWeight.w700,
-              shadows: const [
-                Shadow(color: Pal.ink, offset: Offset(0, 4)),
-                Shadow(color: Pal.ember, offset: Offset(0, 2)),
-              ],
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              'EPOCH CLASH',
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              style: AppTheme.display(76, color: Pal.amber).copyWith(
+                shadows: [
+                  ...AppTheme.outline(76.sp),
+                  Shadow(color: Pal.ink, offset: Offset(0, 7.sp)),
+                ],
+              ),
             ),
           ),
-          const SizedBox(height: 4),
-          Text('— STONE AGE —', style: AppTheme.display(18)),
+          SizedBox(height: 2.sp),
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 16.sp, vertical: 3.sp),
+            decoration: BoxDecoration(
+              color: Pal.ember,
+              borderRadius: BorderRadius.circular(8.sp),
+              border: Border.all(color: Pal.ink, width: 2.5.sp),
+            ),
+            child: Text('STONE AGE', style: AppTheme.display(20)),
+          ),
         ],
       ),
     );

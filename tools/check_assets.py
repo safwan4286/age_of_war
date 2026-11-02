@@ -42,8 +42,10 @@ for f in fixed:
     if not (root / "assets/images" / f).exists():
         errors.append(f"missing assets/images/{f}")
 blast = root / "assets/images/fx/blast.png"
-if blast.exists() and Image.open(blast).size != (384, 64):
-    errors.append("fx/blast.png must be 6 frames of 64x64")
+if blast.exists():
+    bw, bh = Image.open(blast).size
+    if bw % bh:
+        errors.append("fx/blast.png must be square frames side by side")
 
 # Every literal 'assets/...' path in lib/ must exist.
 for dart in (root / "lib").rglob("*.dart"):

@@ -58,6 +58,7 @@ class BattleGame extends FlameGame {
 
   Vector2 _screen = Vector2.zero();
   double _camX = 0;
+  bool _dragging = false;
   double _shake = 0;
   bool _ready = false;
   final _rng = math.Random();
@@ -65,7 +66,7 @@ class BattleGame extends FlameGame {
   @override
   Color backgroundColor() => Pal.night;
 
-  double get _zoom => _screen.y <= 0 ? 1 : _screen.y / Layout.worldH;
+  double get _zoom => _screen.y <= 0 ? 1 : _screen.y / Layout.viewH;
   double get _viewW => _screen.x / _zoom;
   double get camLeft => _camX - _viewW / 2;
 
@@ -82,29 +83,37 @@ class BattleGame extends FlameGame {
     _stone = Sprite(images.fromCache(Img.stone));
     _rock = Sprite(images.fromCache(Img.rock));
     _meteor = Sprite(images.fromCache(Img.meteor));
+    // Square frames side by side; the count follows the strip.
+    final blast = images.fromCache(Img.blast);
     _blast = SpriteAnimation.fromFrameData(
-      images.fromCache(Img.blast),
+      blast,
       SpriteAnimationData.sequenced(
-        amount: 6,
+        amount: blast.width ~/ blast.height,
         stepTime: 0.07,
-        textureSize: Vector2.all(64),
+        textureSize: Vector2.all(blast.height.toDouble()),
         loop: false,
       ),
     );
 
-    for (final (img, f, p) in [
-      (Img.bgSky, 0.2, -30),
-      (Img.bgHills, 0.5, -20),
-      (Img.bgNear, 1.0, -10),
+    for (final (img, name, f, p) in [
+      (Img.bgSky, 'sky', 0.2, -30),
+      (Img.bgHills, 'hills', 0.5, -20),
+      (Img.bgNear, 'near', 1.0, -10),
     ]) {
+      final place = data.layer(name);
       final layer = BgLayer(
         sprite: Sprite(images.fromCache(img)),
         factor: f,
         priority: p,
+        layerTop: place.top,
+        layerH: place.height,
       );
       _layers.add(layer);
       world.add(layer);
     }
+
+    // The sky reddens while meteors are falling.
+    world.add(_SkyTint(sim));
 
     for (final side in Side.values) {
       final red = side == Side.enemy;
@@ -112,6 +121,7 @@ class BattleGame extends FlameGame {
         side: side,
         sim: sim,
         base: Sprite(images.fromCache(Img.base(red: red))),
+        cliff: Sprite(images.fromCache(Img.cliff(red: red))),
         turret: Sprite(images.fromCache(Img.turret(red: red))),
         turretFire: Sprite(images.fromCache(Img.turretFire(red: red))),
       );
@@ -134,10 +144,42 @@ class BattleGame extends FlameGame {
     _applyCamera();
   }
 
-  /// Drag on the battlefield: [screenDx] in logical pixels.
+  /// Where the camera centre rests: the whole player base at the left,
+  /// the whole enemy base at the right.
+  (double, double) get _rest {
+    final half = _viewW / 2;
+    final left = (_bases[Side.player]?.artLeft ?? 0) - Layout.camMargin;
+    final right = (_bases[Side.enemy]?.artRight ?? sim.data.laneLength) + Layout.camMargin;
+    final lo = left + half, hi = right - half;
+    return lo >= hi ? ((lo + hi) / 2, (lo + hi) / 2) : (lo, hi);
+  }
+
+  void panStart() => _dragging = true;
+
+  void panEnd() => _dragging = false;
+
+  /// Drag on the battlefield: [screenDx] in logical pixels. Past either
+  /// end the drag meets growing resistance (rubber band); on release the
+  /// camera springs back in [update].
   void panBy(double screenDx) {
-    _camX -= screenDx / _zoom;
+    final (lo, hi) = _rest;
+    var d = -screenDx / _zoom;
+    final over = _camX < lo ? lo - _camX : (_camX > hi ? _camX - hi : 0.0);
+    final outward = (_camX <= lo && d < 0) || (_camX >= hi && d > 0);
+    if (outward) d *= 0.5 * (1 - over / Layout.overscroll).clamp(0.0, 1.0);
+    _camX += d;
     _applyCamera();
+  }
+
+  void _springBack(double dt) {
+    if (_dragging || !_ready) return;
+    final (lo, hi) = _rest;
+    final target = _camX.clamp(lo, hi).toDouble();
+    if ((target - _camX).abs() < 0.5) {
+      _camX = target;
+    } else {
+      _camX += (target - _camX) * math.min(1.0, dt * 12);
+    }
   }
 
   /// Centre the camera on a lane x (minimap / "jump to front").
@@ -147,13 +189,10 @@ class BattleGame extends FlameGame {
   }
 
   void _applyCamera() {
-    if (_screen.x <= 0) return;
-    final lane = sim.data.laneLength;
-    final half = _viewW / 2;
-    final lo = half - Layout.camMargin;
-    final hi = lane - half + Layout.camMargin;
-    _camX = lo >= hi ? lane / 2 : _camX.clamp(lo, hi).toDouble();
-    if (!_ready) return;
+    if (_screen.x <= 0 || !_ready) return;
+    final (lo, hi) = _rest;
+    if (_camX.isInfinite) _camX = _camX < 0 ? lo : hi;
+    _camX = _camX.clamp(lo - Layout.overscroll, hi + Layout.overscroll).toDouble();
     camera.viewfinder.zoom = _zoom;
     var sx = 0.0, sy = 0.0;
     if (_shake > 0) {
@@ -161,9 +200,9 @@ class BattleGame extends FlameGame {
       sx = (_rng.nextDouble() * 2 - 1) * a;
       sy = (_rng.nextDouble() * 2 - 1) * a;
     }
-    camera.viewfinder.position = Vector2(_camX + sx, Layout.worldH / 2 + sy);
+    camera.viewfinder.position = Vector2(_camX + sx, Layout.viewTop + Layout.viewH / 2 + sy);
     for (final l in _layers) {
-      l.follow(camLeft);
+      l.follow(camLeft, _viewW);
     }
   }
 
@@ -173,7 +212,12 @@ class BattleGame extends FlameGame {
 
   @override
   void update(double dt) {
-    if (!_ready || frozen) return;
+    if (!_ready) return;
+    _springBack(dt);
+    if (frozen) {
+      _applyCamera();
+      return;
+    }
     final step = dt * speed;
     ai.update(step);
     sim.step(step);
@@ -263,5 +307,28 @@ class BattleGame extends FlameGame {
           break;
       }
     }
+  }
+}
+
+/// Red wash over the sky (between the sky and hill layers) while a meteor
+/// shower is falling; fades in and out.
+class _SkyTint extends RectangleComponent {
+  _SkyTint(this.sim)
+    : super(
+        position: Vector2(-4000, Layout.viewTop - 200),
+        size: Vector2(12000, Layout.viewH + 400),
+        priority: -25,
+        paint: Paint()..color = const Color(0x00000000),
+      );
+
+  final BattleSim sim;
+  double _alpha = 0;
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+    final target = sim.meteors.isNotEmpty ? 0.45 : 0.0;
+    _alpha += (target - _alpha) * math.min(1.0, dt * 3);
+    paint.color = Color.fromRGBO(150, 30, 20, _alpha);
   }
 }
