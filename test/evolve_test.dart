@@ -60,6 +60,9 @@ void main() {
     expect(sim.castMeteor(Side.player), isTrue);
     expect(sim.meteors.length, data.era(1).meteor.count);
     expect(sim.meteors.first.sprite, data.era(1).meteor.sprite);
+    // Arrow Rain: a volley in the air for fallTime before the first lands.
+    expect(sim.meteors.first.style, 'arrows');
+    expect(sim.meteors.first.at - sim.time, closeTo(data.era(1).meteor.fallTime, 1e-9));
   });
 
   test('ranged shots and turret shots carry their era art', () {

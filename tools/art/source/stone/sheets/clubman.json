@@ -1,0 +1,26 @@
+{
+  "_note": "SpriteCook walk + idle; attack and death stay the earlier strips. Walk is drawn ~8% bigger than the idle (headband 513 vs 470 px above the feet).",
+  "sprite": "clubman",
+  "era": "stone",
+  "fitExisting": true,
+  "referenceHeight": 548,
+  "sheets": {
+    "walk": {
+      "file": "clubman_walk.png",
+      "cols": 8,
+      "count": 8,
+      "anchor": "median",
+      "scale": 0.92
+    },
+    "idle": {
+      "file": "clubman_idle.png",
+      "cols": 8,
+      "count": 8,
+      "anchor": "first"
+    }
+  },
+  "frameTimes": {
+    "walk": 0.12,
+    "idle": 0.15
+  }
+}

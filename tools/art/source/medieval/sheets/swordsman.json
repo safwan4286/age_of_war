@@ -39,8 +39,8 @@
     }
   },
   "frameTimes": {
-    "idle": 0.0667,
-    "walk": 0.0833,
+    "idle": 0.15,
+    "walk": 0.12,
     "attack": 0.0667
   },
   "impactFrame": 8,

@@ -266,6 +266,13 @@ class BattleGame extends FlameGame {
     return lo >= hi ? ((lo + hi) / 2, (lo + hi) / 2) : (lo, hi);
   }
 
+  /// Where the battle opens: the gate with [Layout.baseShow] of the base
+  /// behind it, not the whole castle.
+  double _start(double lo, double hi) {
+    final left = sim.frontOf(Side.player) - Layout.baseShow - Layout.camMargin;
+    return (left + _viewW / 2).clamp(lo, hi).toDouble();
+  }
+
   void panStart() => _dragging = true;
 
   void panEnd() => _dragging = false;
@@ -303,7 +310,7 @@ class BattleGame extends FlameGame {
   void _applyCamera() {
     if (_screen.x <= 0 || !_ready) return;
     final (lo, hi) = _rest;
-    if (_camX.isInfinite) _camX = _camX < 0 ? lo : hi;
+    if (_camX.isInfinite) _camX = _camX < 0 ? _start(lo, hi) : hi;
     _camX = _camX.clamp(lo - Layout.overscroll, hi + Layout.overscroll).toDouble();
     camera.viewfinder.zoom = _zoom;
     var sx = 0.0, sy = 0.0;
@@ -380,7 +387,7 @@ class BattleGame extends FlameGame {
     });
 
     for (final m in sim.meteors) {
-      if (_falling.contains(m) || sim.time < m.at - MeteorView.fallTime) {
+      if (_falling.contains(m) || sim.time < m.at - m.fallTime) {
         continue;
       }
       final sprite = _fx[m.sprite];

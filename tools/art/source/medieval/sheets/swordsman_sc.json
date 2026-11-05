@@ -1,0 +1,25 @@
+{
+  "_note": "Run after swordsman.json: SpriteCook walk + idle over that build; its attack (19 frames) and Veo death stay. Walk drawn ~16% bigger than idle.",
+  "sprite": "swordsman",
+  "era": "medieval",
+  "fitExisting": true,
+  "sheets": {
+    "walk": {
+      "file": "swordsman_sc_walk.png",
+      "cols": 8,
+      "count": 8,
+      "anchor": "median",
+      "scale": 0.84
+    },
+    "idle": {
+      "file": "swordsman_sc_idle.png",
+      "cols": 8,
+      "count": 8,
+      "anchor": "first"
+    }
+  },
+  "frameTimes": {
+    "walk": 0.12,
+    "idle": 0.15
+  }
+}

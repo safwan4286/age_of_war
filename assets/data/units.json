@@ -207,14 +207,14 @@
           "frameH": 191,
           "drawScale": 0.61,
           "frames": {
-            "idle": 9,
-            "walk": 4,
+            "idle": 8,
+            "walk": 8,
             "attack": 8,
             "die": 5
           },
           "frameTimes": {
-            "idle": 0.16,
-            "walk": 0.25
+            "idle": 0.15,
+            "walk": 0.12
           },
           "headY": 110,
           "role": "melee"
@@ -379,11 +379,13 @@
         "blast": "medieval_blast",
         "cooldown": 60,
         "count": 16,
-        "duration": 2.0,
+        "duration": 1.6,
         "damage": 90,
         "radius": 50,
-        "size": 60,
-        "blastSize": 120
+        "size": 56,
+        "blastSize": 80,
+        "style": "arrows",
+        "fallTime": 0.75
       },
       "icons": {
         "special": "icon_arrowrain",
@@ -409,14 +411,14 @@
           "frameW": 364,
           "frameH": 198,
           "frames": {
-            "walk": 16,
-            "idle": 23,
+            "walk": 8,
+            "idle": 8,
             "attack": 19,
             "die": 8
           },
           "frameTimes": {
-            "idle": 0.0667,
-            "walk": 0.0833,
+            "idle": 0.15,
+            "walk": 0.12,
             "attack": 0.0667
           },
           "drawScale": 0.6102,
@@ -449,8 +451,8 @@
             "walk": 8
           },
           "frameTimes": {
-            "idle": 0.0667,
-            "walk": 0.0833,
+            "idle": 0.15,
+            "walk": 0.12,
             "attack": 0.0833
           },
           "drawScale": 0.4952,
@@ -486,7 +488,7 @@
           },
           "frameTimes": {
             "idle": 0.15,
-            "walk": 0.09
+            "walk": 0.08
           },
           "drawScale": 0.75,
           "headY": 150

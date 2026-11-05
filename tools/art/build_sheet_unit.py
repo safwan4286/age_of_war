@@ -45,6 +45,7 @@ from pathlib import Path
 
 import numpy as np
 from PIL import Image
+from scipy import ndimage
 
 sys.path.insert(0, str(Path(__file__).parent))
 from build_unit import red_variant  # noqa: E402
@@ -70,10 +71,20 @@ def cells(path: Path, cols: int, count: int, drop=(), scale=1.0):
 
 
 def despill(frame: Image.Image) -> Image.Image:
-    """Edges and thin lines (bow strings) that kept a magenta tint from the
-    source background become a neutral warm colour of the same lightness."""
+    """Cleans a tool's export: background magenta it failed to remove
+    becomes transparent, stray specks are dropped, and edges or thin lines
+    (bow strings) that kept a magenta tint become a neutral warm colour of
+    the same lightness."""
     a = np.asarray(frame).astype(np.float32)
     r, g, b = a[..., 0], a[..., 1], a[..., 2]
+    bright = (r > 170) & (b > 170) & (g < 120) & (np.abs(r - b) < 110)
+    a[..., 3] = np.where(bright, 0, a[..., 3])
+    solid = a[..., 3] > 40
+    lab, n = ndimage.label(ndimage.binary_dilation(solid, iterations=3))
+    if n > 1:
+        sizes = ndimage.sum(solid, lab, range(1, n + 1))
+        keep = np.isin(lab, [i + 1 for i, v in enumerate(sizes) if v >= max(60, 0.003 * sizes.max())])
+        a[..., 3] = np.where(keep, a[..., 3], 0)
     m = (a[..., 3] > 0) & (r - g > 60) & (b - g > 50)
     if m.any():
         lum = (r + b) / 2
@@ -102,9 +113,21 @@ def fit_existing(spec, src, root):
     u = next(u for u in era["units"] if u["sprite"] == spec["sprite"])
     cw, ch = u["frameW"], u["frameH"]
     figure = u["headY"] / u["drawScale"]  # current figure height in px
-    k = figure / spec["referenceHeight"]
-    half, base = cw / 2, ch - 2
+    ref = spec.get("referenceHeight")
+    if ref is None:  # the new idle's own height
+        s = spec["sheets"]["idle"]
+        ref = body(cells(src / s["file"], s["cols"], s["count"])[0])[2]
+    k = figure / ref
     out = root / "assets/images/units"
+    # Line the new frames up with the unit's current idle (torso and feet),
+    # so switching between old and new strips doesn't jump.
+    half, base = cw / 2, ch - 2
+    idle = out / f"{spec['era']}_{spec['sprite']}_idle.png"
+    if idle.exists():
+        tx, feet, _ = body(Image.open(idle).convert("RGBA").crop((0, 0, cw, ch)))
+        half, base = tx, feet
+    elif "alignTo" in spec:
+        half, base = spec["alignTo"]
     for name, s in spec["sheets"].items():
         frames = cells(src / s["file"], s["cols"], s["count"], set(s.get("drop", [])), k * s.get("scale", 1.0))
         info = [body(f) for f in frames]
@@ -116,7 +139,7 @@ def fit_existing(spec, src, root):
         for i, f in enumerate(frames):
             a = np.asarray(f)[..., 3] > 20
             ys, xs = np.nonzero(a)
-            if xs.min() - ax < -half or xs.max() - ax > half or ay - ys.min() > base:
+            if xs.min() - ax < -half or xs.max() - ax > cw - half or ay - ys.min() > base:
                 print(f"warning: {name} frame {i} pokes out of the {cw}x{ch} cell")
             cell = Image.new("RGBA", (cw, ch), (0, 0, 0, 0))
             cell.alpha_composite(f, (int(round(half - ax)), int(base - ay)))

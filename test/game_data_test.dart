@@ -17,14 +17,25 @@ void main() {
       ]);
     });
 
+    test('every unit moves at one pace: idle loop 1.2 s, walk cycle 0.96 s (0.64 s mounted)', () {
+      for (final u in data.units) {
+        final idle = u.frameCount('idle') * u.frameTime('idle', 0);
+        final walk = u.frameCount('walk') * u.frameTime('walk', 0);
+        expect(idle, closeTo(1.2, 0.01), reason: u.id);
+        expect(walk, closeTo(u.role == UnitRole.heavy ? 0.64 : 0.96, 0.01), reason: u.id);
+      }
+    });
+
     test('frame counts come from the data; defaults are 4/6/6/6', () {
       expect(UnitDef.defaultFrames['walk'], 6);
       expect(data.unit('dinorider').frameCount('walk'), 8);
       expect(data.unit('dinorider').frameTime('walk', 0.1), 0.08);
       expect(data.unit('chief').frameCount('walk'), 8);
       expect(data.unit('chief').frameCount('die'), 6);
-      expect(data.unit('clubman').frameCount('walk'), 4);
-      expect(data.unit('clubman').frameTime('walk', 0.1), 0.25);
+      // SpriteCook walk + idle (8 frames each), earlier attack and death.
+      expect(data.unit('clubman').frameCount('walk'), 8);
+      expect(data.unit('clubman').frameCount('idle'), 8);
+      expect(data.unit('clubman').frameTime('walk', 0.1), 0.12);
       // Walk and idle from video frames, attack and death from Gemini sheets.
       expect(data.unit('slinger').frameCount('walk'), 8);
       expect(data.unit('slinger').frameCount('attack'), 6);

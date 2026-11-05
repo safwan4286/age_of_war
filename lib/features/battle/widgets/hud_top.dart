@@ -19,7 +19,7 @@ class HudTop extends GetView<BattleController> {
   Widget build(BuildContext context) {
     final c = controller;
     return Padding(
-      padding: EdgeInsets.fromLTRB(10.sp, 6.sp, 10.sp, 0),
+      padding: EdgeInsets.only(top: 6.sp),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

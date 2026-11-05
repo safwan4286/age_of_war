@@ -15,7 +15,7 @@ class HudActions extends GetView<BattleController> {
   Widget build(BuildContext context) {
     final c = controller;
     return Padding(
-      padding: EdgeInsets.fromLTRB(0, 0, 10.sp, 6.sp),
+      padding: EdgeInsets.only(bottom: 6.sp),
       child: Obx(() {
         // Rebuild when gold or levels change.
         c.gold.value;

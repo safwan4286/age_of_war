@@ -208,6 +208,8 @@ class MeteorDef {
     this.blast = 'blast',
     this.size = 110,
     this.blastSize = 160,
+    this.fallTime = 0.4,
+    this.style = 'meteor',
   });
 
   /// Shown on the HUD; the sim treats every era's special the same way.
@@ -220,6 +222,14 @@ class MeteorDef {
   /// Drawn widths in world units: the falling thing and its impact.
   final double size;
   final double blastSize;
+
+  /// Seconds each one is visibly in the air before it lands.
+  final double fallTime;
+
+  /// How it falls: 'meteor' (diagonal, tumbling art) or 'arrows' (a volley
+  /// arcing in from behind the caster, pointing where it flies, and
+  /// sticking in the ground).
+  final String style;
   final double cooldown;
   final int count;
   final double duration;
@@ -237,6 +247,8 @@ class MeteorDef {
     blast: m.str('blast', 'blast'),
     size: m.dbl('size', 110),
     blastSize: m.dbl('blastSize', 160),
+    fallTime: m.dbl('fallTime', 0.4),
+    style: m.str('style', 'meteor'),
   );
 }
 

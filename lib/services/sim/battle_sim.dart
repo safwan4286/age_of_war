@@ -95,9 +95,15 @@ class MeteorImpact {
     this.blast = 'blast',
     this.size = 110,
     this.blastSize = 160,
+    this.fallTime = 0.4,
+    this.style = 'meteor',
   });
 
   final Side caster;
+
+  /// Seconds in the air before landing, and how it falls (see MeteorDef).
+  final double fallTime;
+  final String style;
 
   /// Drawn widths (world units) of the falling thing and its impact.
   final double size;
@@ -376,12 +382,14 @@ class BattleSim {
         MeteorImpact(
           caster: s,
           x: lo + rng.nextDouble() * (hi - lo),
-          // Each meteor falls for 0.4 s before it lands.
-          at: time + 0.4 + m.duration * i / m.count,
+          // Each one is in the air for fallTime before it lands.
+          at: time + m.fallTime + m.duration * i / m.count,
           sprite: m.sprite,
           blast: m.blast,
           size: m.size,
           blastSize: m.blastSize,
+          fallTime: m.fallTime,
+          style: m.style,
         ),
       );
     }

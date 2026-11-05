@@ -1,0 +1,25 @@
+{
+  "_note": "SpriteCook walk + idle; Veo attack and death. Walk drawn ~10% bigger than idle (plume top 565 vs 510 px).",
+  "sprite": "knight",
+  "era": "medieval",
+  "fitExisting": true,
+  "sheets": {
+    "walk": {
+      "file": "knight_walk.png",
+      "cols": 8,
+      "count": 8,
+      "anchor": "median",
+      "scale": 0.9
+    },
+    "idle": {
+      "file": "knight_idle.png",
+      "cols": 8,
+      "count": 8,
+      "anchor": "first"
+    }
+  },
+  "frameTimes": {
+    "walk": 0.08,
+    "idle": 0.15
+  }
+}

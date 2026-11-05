@@ -1,0 +1,25 @@
+{
+  "_note": "SpriteCook walk + idle (idle exported with its magenta background; keyed here); Veo attack and death.",
+  "sprite": "king",
+  "era": "medieval",
+  "fitExisting": true,
+  "sheets": {
+    "walk": {
+      "file": "king_walk.png",
+      "cols": 8,
+      "count": 8,
+      "anchor": "median",
+      "scale": 1.0
+    },
+    "idle": {
+      "file": "king_idle.png",
+      "cols": 8,
+      "count": 8,
+      "anchor": "first"
+    }
+  },
+  "frameTimes": {
+    "walk": 0.12,
+    "idle": 0.15
+  }
+}

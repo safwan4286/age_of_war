@@ -20,7 +20,7 @@ class HudUnits extends GetView<BattleController> {
   Widget build(BuildContext context) {
     final c = controller;
     return Padding(
-      padding: EdgeInsets.fromLTRB(10.sp, 0, 0, 6.sp),
+      padding: EdgeInsets.only(bottom: 6.sp),
       // The shop is the player's current age; it swaps on evolve.
       child: Obx(
         () => Row(

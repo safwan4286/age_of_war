@@ -20,8 +20,14 @@ class Layout {
   /// Where units' feet touch the ground.
   static const double groundY = 418;
 
-  /// The base picture's foot sits this far below the walk line.
-  static const double baseSink = 10;
+  /// The base picture's foot sits this far below the walk line. Kept
+  /// tiny: units spawn in the gateway, and a deeper base made them look
+  /// like they stood in the air in front of it.
+  static const double baseSink = 1;
+
+  /// How much of our base the battle opens on, behind the gate. A big
+  /// castle is otherwise half the screen; dragging still shows all of it.
+  static const double baseShow = 300;
 
   /// Turret width on a ledge; height follows the art.
   static const double turretW = 76;
