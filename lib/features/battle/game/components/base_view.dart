@@ -8,7 +8,8 @@ import '../../../../models/game_data.dart';
 import '../../../../services/sim/battle_sim.dart';
 import '../world_layout.dart';
 
-/// A base at one end of the lane, with a turret on each built ledge.
+/// A base at one end of the lane, with a turret on each built ledge. One
+/// per era: evolving replaces it.
 ///
 /// Where the gate and the ledges sit on the picture comes from
 /// `units.json` (base.art), so new base art only needs new numbers. The
@@ -17,6 +18,7 @@ class BaseView extends PositionComponent {
   BaseView({
     required this.side,
     required this.sim,
+    required this.era,
     required Sprite base,
     required Sprite cliff,
     required Sprite turret,
@@ -29,6 +31,9 @@ class BaseView extends PositionComponent {
 
   final Side side;
   final BattleSim sim;
+
+  /// Index into GameData.eras: which castle/cave this is.
+  final int era;
   final Sprite _baseSprite;
   final Sprite _cliffSprite;
   final Sprite _turretSprite;
@@ -36,7 +41,7 @@ class BaseView extends PositionComponent {
   late final SpriteComponent _base;
   final List<_TurretView> _turrets = [];
 
-  BaseArt get art => sim.data.baseArt;
+  BaseArt get art => sim.data.era(era).baseArt;
 
   double get drawH => art.height;
   double get drawW => drawH * _baseSprite.srcSize.x / _baseSprite.srcSize.y;
@@ -109,15 +114,19 @@ class BaseView extends PositionComponent {
     );
   }
 
-  /// Shows ledge [slot]'s catapult in its thrown pose for a moment.
+  /// Shows ledge [slot]'s turret in its fired pose for a moment.
   void fireTurret(int slot) {
     if (slot >= 0 && slot < _turrets.length) _turrets[slot].fire();
   }
 
-  /// Where a rock leaves the catapult on ledge [slot].
+  /// Where a shot leaves the turret on ledge [slot]: high on a catapult's
+  /// arm, at the front of a ballista's beam.
   Vector2 launchPos(int slot) {
     final p = slotPos(slot);
-    return Vector2(p.x, p.y - turretW * 0.7);
+    final th = turretW * _turretSprite.srcSize.y / _turretSprite.srcSize.x;
+    return th < turretW * 0.65
+        ? Vector2(p.x + side.dir * turretW * 0.35, p.y - th * 0.58)
+        : Vector2(p.x, p.y - turretW * 0.7);
   }
 
   @override

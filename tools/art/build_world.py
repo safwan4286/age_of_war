@@ -201,7 +201,9 @@ def main():
         d.mkdir(parents=True, exist_ok=True)
     data_path = root / "assets/data/units.json"
     data = json.loads(data_path.read_text())
-    world = data.setdefault("world", {})
+    # Stone Age is era 0; the Medieval world has its own builder.
+    era = data["eras"][0]
+    world = era.setdefault("world", {})
     layers = world.setdefault("layers", {
         "sky": {"top": 0, "height": 540},
         "hills": {"top": 60, "height": 480},
@@ -217,7 +219,7 @@ def main():
         build_icons(src, root)
 
     # --- Base ---------------------------------------------------------
-    build_rest(src, bases, fx, data)
+    build_rest(src, bases, fx, era)
     data_path.write_text(json.dumps(data, indent=2) + "\n")
     print("world layers", layers)
 
@@ -300,7 +302,7 @@ def build_blast(src, fx):
     strip.save(fx / "blast.png")
 
 
-def build_rest(src, bases, fx, data):
+def build_rest(src, bases, fx, era):
     raw = Image.open(src / "stone_base.png")
     base = key(raw, min_area=5000)
     x0, y0, x1, _ = base.getchannel("A").getbbox()
@@ -318,7 +320,7 @@ def build_rest(src, bases, fx, data):
     lintel = found[-1]
     ledges = sorted(found[:-1], key=lambda p: -(p[2] - p[1]))[:3]
     ledges.sort(key=lambda p: -p[0])  # lowest first: slot 0 builds first
-    art = data["base"].setdefault("art", {})
+    art = era.setdefault("base", {}).setdefault("art", {})
     art["slots"] = [[round(((p[1] + p[2]) / 2 - bx0) / w, 3), round((p[0] - by0) / h, 3)] for p in ledges]
     art["gate"] = round(((lintel[1] + lintel[2]) / 2 - bx0) / w, 3)
     art["ledgeW"] = round(float(np.mean([(p[2] - p[1]) / w for p in ledges])), 3)

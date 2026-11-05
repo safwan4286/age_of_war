@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:flame/cache.dart';
@@ -6,16 +7,20 @@ import 'package:flame/components.dart';
 import '../../../../models/game_data.dart';
 import '../../../../resources/assets.dart';
 import '../../../../services/sim/battle_sim.dart';
+import '../../../../services/sim/swing.dart';
 import '../world_layout.dart';
 
 /// The four animations for one unit type and colour, built once and
 /// shared by every unit of that type (tickers live in the components).
 class UnitAnims {
-  UnitAnims._(this.byState, this.frameSize, this.drawScale);
+  UnitAnims._(this.byState, this.frameSize, this.drawScale, this.swing);
 
   final Map<UnitState, SpriteAnimation> byState;
   final Vector2 frameSize;
   final double drawScale;
+
+  /// Attack frame timing (the attack strip is driven frame by frame).
+  final Swing swing;
 
   Vector2 get drawSize => frameSize * drawScale;
 
@@ -23,10 +28,14 @@ class UnitAnims {
     final frame = Vector2(def.frameW.toDouble(), def.frameH.toDouble());
     SpriteAnimation anim(String name, double Function(int frames) step, bool loop) {
       final frames = def.frameCount(name);
+      final image = images.fromCache(Img.unit(def, name, red: red));
       return SpriteAnimation.fromFrameData(
-          images.fromCache(Img.unit(def.sprite, name, red: red)),
+          image,
           SpriteAnimationData.sequenced(
             amount: frames,
+            // Long animations are stored as grids (a strip can't pass
+            // 4096 px); one row for the old strips.
+            amountPerRow: image.width ~/ def.frameW,
             stepTime: step(frames),
             textureSize: frame,
             loop: loop,
@@ -36,10 +45,10 @@ class UnitAnims {
     return UnitAnims._({
       UnitState.idle: anim('idle', (_) => def.frameTime('idle', 0.16), true),
       UnitState.walking: anim('walk', (_) => def.frameTime('walk', 0.1), true),
-      // One swing per attack, so the loop stays in step with the hits.
+      // Driven by [Swing] in UnitView, not by the ticker.
       UnitState.attacking: anim('attack', (n) => def.attackEvery / n, true),
       UnitState.dying: anim('die', (n) => BattleSim.dyingTime / n, false),
-    }, frame, def.drawScale);
+    }, frame, def.drawScale, Swing(def));
   }
 }
 
@@ -58,6 +67,8 @@ class UnitView extends PositionComponent {
   late final SpriteAnimationGroupComponent<UnitState> _sprite;
   late final HealthBar _bar = HealthBar(unit, anims);
   double _flash = 0;
+  double _lastCooldown = 0;
+  double? _sinceHit;
 
   static const _white = ColorFilter.mode(Color(0xFFFFFFFF), BlendMode.srcATop);
 
@@ -86,6 +97,25 @@ class UnitView extends PositionComponent {
     super.onRemove();
   }
 
+  /// While attacking, the frame comes from the sim's clock so the impact
+  /// frame shows exactly when the blow lands.
+  void _syncSwing(double dt) {
+    final attacking = unit.state == UnitState.attacking;
+    _sprite.playing = !attacking;
+    if (!attacking) return;
+    // The cooldown jumps up when a blow lands.
+    if (unit.cooldown > _lastCooldown + 1e-6) {
+      _sinceHit = 0;
+    } else if (_sinceHit != null) {
+      _sinceHit = _sinceHit! + dt;
+    }
+    _lastCooldown = unit.cooldown;
+    _sprite.animationTicker?.currentIndex = anims.swing.frameAt(
+      toHit: math.max(0, unit.cooldown),
+      sinceHit: _sinceHit,
+    );
+  }
+
   void flash() {
     _flash = 0.08;
     _bar.show();
@@ -95,7 +125,12 @@ class UnitView extends PositionComponent {
   void update(double dt) {
     super.update(dt);
     x = unit.x;
-    if (_sprite.current != unit.state) _sprite.current = unit.state;
+    if (_sprite.current != unit.state) {
+      _sprite.current = unit.state;
+      _sinceHit = null;
+      _lastCooldown = unit.cooldown;
+    }
+    _syncSwing(dt);
     if (_flash > 0) {
       _flash -= dt;
       _sprite.paint.colorFilter = _flash > 0 ? _white : null;

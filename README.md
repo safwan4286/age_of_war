@@ -64,6 +64,26 @@ pick a signing team. Bundle / application id: `app.epochclash.game`.
   (gold, XP, meteor, evolve, turret, stars, lock) come from `stone_world/stone_icons.png` (4x2 grid).
   The previous art is in `tools/art/source/old_world/`.
 
+- **Medieval units (Veo 3.1 video)**: each unit's 4 clips (idle, walk, attack, death) as frames in
+  `tools/art/source/medieval/frames/`, spec in `tools/art/source/medieval/<unit>.json` →
+  `python3 tools/art/build_video_unit.py tools/art/source/medieval/<unit>.json .` keys the magenta,
+  finds the walk loop, picks the listed frames and patches the medieval era in `units.json`.
+- **Medieval world**: sheets in `tools/art/source/medieval/world/` → `python3 tools/art/build_world_medieval.py .`
+  (castle, ballista, sky/hills/ground, bolt/arrow/fire arrow + dust burst, icons). The castle's
+  3 turret spots and gate are measured by hand (`SLOTS_PX`, `GATE_PX` at the top of the script).
+
+## Ages (evolve)
+
+- `units.json` → `eras`: each age has its roster (one unit per role: melee, ranged, heavy, elite),
+  base art and health, turret, special, background layers, HUD icons and the XP to evolve.
+  Art is named by age (`units/medieval_knight_walk.png`, `bases/stone_base.png`); `Img.era` lists it.
+- Fill the XP bar → tap Evolve: new shop, turret type and special, the base swaps (gaining the
+  difference in health) with a flash, and the backdrop cross-fades. Units already out keep fighting.
+  The AI evolves as soon as it can. In AI-vs-AI runs both sides evolve at about 5.5 minutes.
+- The next age's art loads in the background; an age both sides have left is freed once none of
+  its units are on the field (two ages of art are ~230 MB of textures). Tests: `test/evolve_test.dart`,
+  `test/assets_test.dart`.
+
 ## Upgrades
 
 - Six battle upgrades in `units.json` → `upgrades` (melee/ranged damage and armor, turret damage and
@@ -94,6 +114,7 @@ pick a signing team. Bundle / application id: `app.epochclash.game`.
 ## Known gaps (slice scope)
 
 - No audio yet.
-- Evolve shows a "Medieval coming soon" teaser.
+- Two ages (Stone, Medieval). Evolve in the last age shows a "new ages soon" teaser.
+- Two Medieval AIs can stall for 20+ minutes (ballistas + King); needs a playtest pass on balance.
 - Two equal AIs can stall at mid-lane; humans break it with meteor timing. Watch for stalls in playtests.
 - Dino Rider sheet: attack frame 6 and die frame 1 were broken in the source; the slicer reuses neighbouring frames.

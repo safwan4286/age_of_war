@@ -3,16 +3,17 @@ import 'package:flame/components.dart';
 import '../../../../services/sim/battle_sim.dart';
 import '../world_layout.dart';
 
-/// A meteor falling diagonally onto its impact point. It lands exactly at
-/// the sim's impact time; the blast is spawned from the sim's event.
+/// A meteor (or fire arrow) falling diagonally onto its impact point. It
+/// lands exactly at the sim's impact time; the blast is spawned from the
+/// sim's event.
 ///
-/// The art falls down-left (tail up-right); meteors heading right are
+/// The art falls down-left (tail up-right); ones heading right are
 /// mirrored.
 class MeteorView extends SpriteComponent {
   MeteorView(this.impact, this.sim, Sprite sprite)
     : super(
         sprite: sprite,
-        size: Vector2(110, 110 * sprite.srcSize.y / sprite.srcSize.x),
+        size: Vector2(impact.size, impact.size * sprite.srcSize.y / sprite.srcSize.x),
         anchor: Anchor.center,
         priority: 30,
       );
@@ -43,15 +44,15 @@ class MeteorView extends SpriteComponent {
   }
 }
 
-/// Explosion (square frames from fx/blast.png) that removes itself when done.
+/// An impact (square frames side by side) that removes itself when done.
 class BlastView extends SpriteAnimationComponent {
-  BlastView(SpriteAnimation animation, double x)
+  BlastView(SpriteAnimation animation, double x, {double size = 160})
     : super(
         animation: animation,
         removeOnFinish: true,
-        size: Vector2.all(160),
+        size: Vector2.all(size),
         anchor: Anchor.bottomCenter,
-        position: Vector2(x, Layout.groundY + 12),
+        position: Vector2(x, Layout.groundY + size * 0.075),
         priority: 31,
       );
 }

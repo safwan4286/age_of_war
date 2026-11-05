@@ -9,176 +9,8 @@
     "startGold": 175,
     "trickle": 2,
     "queueMax": 5,
-    "evolveXp": 4000,
     "popCap": 10
   },
-  "base": {
-    "hp": 1000,
-    "art": {
-      "_note": "Measured from tools/art/source/stone_world/stone_base.png by build_world.py.",
-      "height": 330,
-      "gate": 0.812,
-      "slots": [
-        [
-          0.83,
-          0.665
-        ],
-        [
-          0.451,
-          0.536
-        ],
-        [
-          0.375,
-          0.341
-        ]
-      ],
-      "ledgeW": 0.281,
-      "turretW": 0.225,
-      "cliff": [
-        0.07,
-        0.07
-      ]
-    }
-  },
-  "turret": {
-    "id": "rock_thrower",
-    "name": "Rock Thrower",
-    "cost": 100,
-    "damage": 12,
-    "attackEvery": 1.5,
-    "range": 300,
-    "sellBack": 50,
-    "projectileSpeed": 420,
-    "slots": 3
-  },
-  "meteor": {
-    "cooldown": 60,
-    "count": 10,
-    "duration": 2.0,
-    "damage": 60,
-    "radius": 60
-  },
-  "units": [
-    {
-      "id": "clubman",
-      "name": "Clubman",
-      "cost": 50,
-      "trainTime": 1.5,
-      "hp": 100,
-      "damage": 18,
-      "attackEvery": 1.0,
-      "range": 20,
-      "speed": 40,
-      "killReward": 65,
-      "xp": 40,
-      "width": 48,
-      "sprite": "clubman",
-      "frameW": 406,
-      "frameH": 191,
-      "drawScale": 0.61,
-      "frames": {
-        "idle": 9,
-        "walk": 4,
-        "attack": 8,
-        "die": 5
-      },
-      "frameTimes": {
-        "idle": 0.16,
-        "walk": 0.25
-      },
-      "headY": 110
-    },
-    {
-      "id": "slinger",
-      "name": "Slinger",
-      "cost": 75,
-      "trainTime": 2.0,
-      "hp": 70,
-      "damage": 14,
-      "attackEvery": 1.2,
-      "range": 160,
-      "speed": 38,
-      "killReward": 98,
-      "xp": 60,
-      "width": 40,
-      "projectileSpeed": 360,
-      "sprite": "slinger",
-      "frameW": 251,
-      "frameH": 191,
-      "drawScale": 0.56,
-      "frames": {
-        "idle": 8,
-        "walk": 8,
-        "attack": 6,
-        "die": 6
-      },
-      "frameTimes": {
-        "idle": 0.15,
-        "walk": 0.12
-      },
-      "headY": 101
-    },
-    {
-      "id": "dinorider",
-      "name": "Dino Rider",
-      "cost": 200,
-      "trainTime": 4.0,
-      "hp": 360,
-      "damage": 40,
-      "attackEvery": 1.4,
-      "range": 24,
-      "speed": 55,
-      "killReward": 260,
-      "xp": 160,
-      "width": 72,
-      "sprite": "dinorider",
-      "frameW": 310,
-      "frameH": 206,
-      "drawScale": 0.78,
-      "frames": {
-        "idle": 8,
-        "walk": 8,
-        "attack": 6,
-        "die": 6
-      },
-      "frameTimes": {
-        "idle": 0.15,
-        "walk": 0.08
-      },
-      "headY": 148
-    },
-    {
-      "id": "chief",
-      "name": "Chief",
-      "cost": 350,
-      "trainTime": 6.0,
-      "hp": 500,
-      "damage": 55,
-      "attackEvery": 1.5,
-      "range": 24,
-      "speed": 35,
-      "killReward": 455,
-      "xp": 280,
-      "width": 52,
-      "auraBonus": 0.1,
-      "auraRadius": 120,
-      "sprite": "chief",
-      "frameW": 336,
-      "frameH": 197,
-      "drawScale": 0.62,
-      "frames": {
-        "idle": 8,
-        "walk": 8,
-        "attack": 6,
-        "die": 6
-      },
-      "frameTimes": {
-        "idle": 0.15,
-        "walk": 0.12
-      },
-      "headY": 118
-    }
-  ],
   "ai": {
     "easy": {
       "income": 0.8,
@@ -197,23 +29,6 @@
       "useMeteor": true,
       "buyTurret": true,
       "thinkEvery": 0.5
-    }
-  },
-  "world": {
-    "bgFromSheets": true,
-    "layers": {
-      "sky": {
-        "top": -140,
-        "height": 690
-      },
-      "hills": {
-        "top": 0,
-        "height": 540
-      },
-      "near": {
-        "top": 160,
-        "height": 420
-      }
     }
   },
   "upgrades": [
@@ -293,6 +108,415 @@
         120,
         240,
         480
+      ]
+    }
+  ],
+  "eras": [
+    {
+      "id": "stone",
+      "name": "Stone Age",
+      "evolveXp": 4000,
+      "baseHp": 1000,
+      "base": {
+        "art": {
+          "_note": "Measured from tools/art/source/stone_world/stone_base.png by build_world.py.",
+          "height": 330,
+          "gate": 0.812,
+          "slots": [
+            [
+              0.83,
+              0.665
+            ],
+            [
+              0.451,
+              0.536
+            ],
+            [
+              0.375,
+              0.341
+            ]
+          ],
+          "ledgeW": 0.281,
+          "turretW": 0.225,
+          "cliff": [
+            0.07,
+            0.07
+          ]
+        }
+      },
+      "world": {
+        "bgFromSheets": true,
+        "layers": {
+          "sky": {
+            "top": -140,
+            "height": 690
+          },
+          "hills": {
+            "top": 0,
+            "height": 540
+          },
+          "near": {
+            "top": 160,
+            "height": 420
+          }
+        }
+      },
+      "turret": {
+        "id": "rock_thrower",
+        "name": "Rock Thrower",
+        "cost": 100,
+        "damage": 12,
+        "attackEvery": 1.5,
+        "range": 300,
+        "sellBack": 50,
+        "projectileSpeed": 420,
+        "slots": 3,
+        "projectile": "rock"
+      },
+      "special": {
+        "cooldown": 60,
+        "count": 10,
+        "duration": 2.0,
+        "damage": 60,
+        "radius": 60,
+        "name": "Meteor",
+        "sprite": "meteor",
+        "blast": "blast"
+      },
+      "icons": {
+        "special": "icon_meteor",
+        "evolve": "icon_evolve",
+        "turret": "icon_turret"
+      },
+      "units": [
+        {
+          "id": "clubman",
+          "name": "Clubman",
+          "cost": 50,
+          "trainTime": 1.5,
+          "hp": 100,
+          "damage": 18,
+          "attackEvery": 1.0,
+          "range": 20,
+          "speed": 40,
+          "killReward": 65,
+          "xp": 40,
+          "width": 48,
+          "sprite": "clubman",
+          "frameW": 406,
+          "frameH": 191,
+          "drawScale": 0.61,
+          "frames": {
+            "idle": 9,
+            "walk": 4,
+            "attack": 8,
+            "die": 5
+          },
+          "frameTimes": {
+            "idle": 0.16,
+            "walk": 0.25
+          },
+          "headY": 110,
+          "role": "melee"
+        },
+        {
+          "id": "slinger",
+          "name": "Slinger",
+          "cost": 75,
+          "trainTime": 2.0,
+          "hp": 70,
+          "damage": 14,
+          "attackEvery": 1.2,
+          "range": 160,
+          "speed": 38,
+          "killReward": 98,
+          "xp": 60,
+          "width": 40,
+          "projectileSpeed": 360,
+          "sprite": "slinger",
+          "frameW": 251,
+          "frameH": 191,
+          "drawScale": 0.56,
+          "frames": {
+            "idle": 8,
+            "walk": 8,
+            "attack": 6,
+            "die": 6
+          },
+          "frameTimes": {
+            "idle": 0.15,
+            "walk": 0.12
+          },
+          "headY": 101,
+          "role": "ranged",
+          "projectile": "stone"
+        },
+        {
+          "id": "dinorider",
+          "name": "Dino Rider",
+          "cost": 200,
+          "trainTime": 4.0,
+          "hp": 360,
+          "damage": 40,
+          "attackEvery": 1.4,
+          "range": 24,
+          "speed": 55,
+          "killReward": 260,
+          "xp": 160,
+          "width": 72,
+          "sprite": "dinorider",
+          "frameW": 310,
+          "frameH": 206,
+          "drawScale": 0.78,
+          "frames": {
+            "idle": 8,
+            "walk": 8,
+            "attack": 6,
+            "die": 6
+          },
+          "frameTimes": {
+            "idle": 0.15,
+            "walk": 0.08
+          },
+          "headY": 148,
+          "role": "heavy"
+        },
+        {
+          "id": "chief",
+          "name": "Chief",
+          "cost": 350,
+          "trainTime": 6.0,
+          "hp": 500,
+          "damage": 55,
+          "attackEvery": 1.5,
+          "range": 24,
+          "speed": 35,
+          "killReward": 455,
+          "xp": 280,
+          "width": 52,
+          "auraBonus": 0.1,
+          "auraRadius": 120,
+          "sprite": "chief",
+          "frameW": 336,
+          "frameH": 197,
+          "drawScale": 0.62,
+          "frames": {
+            "idle": 8,
+            "walk": 8,
+            "attack": 6,
+            "die": 6
+          },
+          "frameTimes": {
+            "idle": 0.15,
+            "walk": 0.12
+          },
+          "headY": 118,
+          "role": "elite"
+        }
+      ]
+    },
+    {
+      "id": "medieval",
+      "name": "Medieval Age",
+      "baseHp": 1500,
+      "base": {
+        "art": {
+          "height": 380,
+          "gate": 0.962,
+          "slots": [
+            [
+              0.923,
+              0.58
+            ],
+            [
+              0.738,
+              0.415
+            ],
+            [
+              0.656,
+              0.221
+            ]
+          ],
+          "turretW": 0.21,
+          "cliff": [
+            0.081,
+            0.401
+          ],
+          "ledgeW": 0.21
+        }
+      },
+      "world": {
+        "layers": {
+          "sky": {
+            "top": -140,
+            "height": 690
+          },
+          "hills": {
+            "top": 10,
+            "height": 460
+          },
+          "near": {
+            "top": 177,
+            "height": 420
+          }
+        }
+      },
+      "turret": {
+        "id": "ballista",
+        "name": "Ballista",
+        "cost": 250,
+        "damage": 30,
+        "attackEvery": 1.8,
+        "range": 340,
+        "sellBack": 125,
+        "projectileSpeed": 600,
+        "slots": 3,
+        "projectile": "medieval_bolt"
+      },
+      "special": {
+        "name": "Arrow Rain",
+        "sprite": "medieval_firearrow",
+        "blast": "medieval_blast",
+        "cooldown": 60,
+        "count": 16,
+        "duration": 2.0,
+        "damage": 90,
+        "radius": 50,
+        "size": 60,
+        "blastSize": 120
+      },
+      "icons": {
+        "special": "icon_arrowrain",
+        "evolve": "icon_evolve_medieval",
+        "turret": "icon_ballista"
+      },
+      "units": [
+        {
+          "id": "swordsman",
+          "name": "Swordsman",
+          "role": "melee",
+          "cost": 100,
+          "trainTime": 2.0,
+          "hp": 200,
+          "damage": 39,
+          "attackEvery": 1.3,
+          "range": 22,
+          "speed": 40,
+          "killReward": 130,
+          "xp": 80,
+          "width": 40,
+          "sprite": "swordsman",
+          "frameW": 364,
+          "frameH": 198,
+          "frames": {
+            "walk": 16,
+            "idle": 23,
+            "attack": 19,
+            "die": 8
+          },
+          "frameTimes": {
+            "idle": 0.0667,
+            "walk": 0.0833,
+            "attack": 0.0667
+          },
+          "drawScale": 0.6102,
+          "headY": 108,
+          "impactFrame": 8
+        },
+        {
+          "id": "archer",
+          "name": "Archer",
+          "role": "ranged",
+          "cost": 150,
+          "trainTime": 2.5,
+          "hp": 140,
+          "damage": 24,
+          "attackEvery": 1.3,
+          "range": 190,
+          "speed": 38,
+          "killReward": 195,
+          "xp": 120,
+          "width": 36,
+          "sprite": "archer",
+          "frameW": 413,
+          "frameH": 240,
+          "projectileSpeed": 420,
+          "projectile": "medieval_arrow",
+          "frames": {
+            "idle": 8,
+            "attack": 8,
+            "die": 8,
+            "walk": 8
+          },
+          "frameTimes": {
+            "idle": 0.15,
+            "walk": 0.11
+          },
+          "drawScale": 0.4952,
+          "headY": 104
+        },
+        {
+          "id": "knight",
+          "name": "Knight",
+          "role": "heavy",
+          "cost": 400,
+          "trainTime": 4.5,
+          "hp": 700,
+          "damage": 70,
+          "attackEvery": 1.4,
+          "range": 30,
+          "speed": 60,
+          "killReward": 520,
+          "xp": 320,
+          "width": 74,
+          "sprite": "knight",
+          "frameW": 315,
+          "frameH": 223,
+          "frames": {
+            "idle": 8,
+            "attack": 8,
+            "die": 8,
+            "walk": 8
+          },
+          "frameTimes": {
+            "idle": 0.15,
+            "walk": 0.09
+          },
+          "drawScale": 0.75,
+          "headY": 150
+        },
+        {
+          "id": "king",
+          "name": "King",
+          "role": "elite",
+          "cost": 700,
+          "trainTime": 6.5,
+          "hp": 1000,
+          "damage": 95,
+          "attackEvery": 1.5,
+          "range": 26,
+          "speed": 34,
+          "killReward": 910,
+          "xp": 560,
+          "width": 48,
+          "sprite": "king",
+          "frameW": 391,
+          "frameH": 262,
+          "auraBonus": 0.12,
+          "auraRadius": 140,
+          "frames": {
+            "idle": 8,
+            "attack": 8,
+            "die": 8,
+            "walk": 8
+          },
+          "frameTimes": {
+            "idle": 0.15,
+            "walk": 0.12
+          },
+          "drawScale": 0.581,
+          "headY": 122
+        }
       ]
     }
   ]

@@ -21,15 +21,18 @@ class HudUnits extends GetView<BattleController> {
     final c = controller;
     return Padding(
       padding: EdgeInsets.fromLTRB(10.sp, 0, 0, 6.sp),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          for (final u in c.data.units) ...[
-            UnitCard(def: u),
-            SizedBox(width: 4.sp),
+      // The shop is the player's current age; it swaps on evolve.
+      child: Obx(
+        () => Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            for (final u in c.shopUnits) ...[
+              UnitCard(key: ValueKey(u.id), def: u),
+              SizedBox(width: 4.sp),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }

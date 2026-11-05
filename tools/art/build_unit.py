@@ -415,7 +415,7 @@ def main():
 
     data_path = root / "assets/data/units.json"
     data = json.loads(data_path.read_text())
-    for u in data["units"]:
+    for u in (u for e in data["eras"] for u in e["units"]):
         if u["sprite"] == spec["sprite"]:
             u["frameW"], u["frameH"] = cw, ch
             u["frames"] = counts

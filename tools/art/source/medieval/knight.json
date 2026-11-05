@@ -1,0 +1,45 @@
+{
+  "height": 200,
+  "worldHeight": 150,
+  "width": 74,
+  "pick": {
+    "idle": [
+      0,
+      2,
+      4,
+      6,
+      8,
+      10,
+      12,
+      14
+    ],
+    "attack": [
+      0,
+      5,
+      9,
+      12,
+      14,
+      18,
+      27,
+      33
+    ],
+    "die": [
+      4,
+      8,
+      11,
+      14,
+      17,
+      22,
+      24,
+      27
+    ]
+  },
+  "frameTimes": {
+    "idle": 0.15,
+    "walk": 0.09
+  },
+  "sprite": "knight",
+  "era": "medieval",
+  "frames": "frames",
+  "walk": "loop"
+}

@@ -20,6 +20,7 @@ class HudActions extends GetView<BattleController> {
         // Rebuild when gold or levels change.
         c.gold.value;
         c.upgrades.length;
+        c.era.value;
         final built = c.turrets.where((t) => t).length;
         final slots = c.turrets.length;
         return Row(
@@ -33,7 +34,7 @@ class HudActions extends GetView<BattleController> {
             ),
             SizedBox(width: 8.sp),
             _ActionButton(
-              image: UiImg.turret,
+              image: UiImg.turret(c.playerEra),
               semantics: 'Turrets: $built of $slots ledges built. Open the build menu',
               glow: c.canBuildTurret,
               badge: '$built/$slots',

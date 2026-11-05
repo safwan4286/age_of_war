@@ -1,3 +1,5 @@
+import '../models/game_data.dart';
+
 /// Every asset path in one place. Flame's image cache already prefixes
 /// `assets/images/`, so [Img] paths are relative to that.
 class AppAssets {
@@ -6,76 +8,93 @@ class AppAssets {
   static const unitsJson = 'assets/data/units.json';
 }
 
-/// Flame image keys (relative to assets/images/).
+/// Flame image keys (relative to assets/images/). Art is named by era:
+/// `units/medieval_knight_walk.png`, `bases/stone_base_red.png`...
 class Img {
   Img._();
 
   static const unitAnims = ['idle', 'walk', 'attack', 'die'];
+  static const bgLayers = ['sky', 'hills', 'near'];
+
+  static String _red(bool red) => red ? '_red' : '';
 
   /// Horizontal strip for one unit animation. Enemy art adds `_red`.
-  static String unit(String sprite, String anim, {bool red = false}) =>
-      'units/stone_${sprite}_$anim${red ? '_red' : ''}.png';
+  static String unit(UnitDef def, String anim, {bool red = false}) =>
+      'units/${def.era}_${def.sprite}_$anim${_red(red)}.png';
 
-  static String base({bool red = false}) =>
-      'bases/stone_base${red ? '_red' : ''}.png';
+  static String base(String era, {bool red = false}) => 'bases/${era}_base${_red(red)}.png';
 
-  /// Rock that continues the base off screen (repeated, mirrored).
-  static String cliff({bool red = false}) =>
-      'bases/stone_cliff${red ? '_red' : ''}.png';
+  /// What continues the base off screen (repeated, mirrored).
+  static String cliff(String era, {bool red = false}) => 'bases/${era}_cliff${_red(red)}.png';
 
-  static String turret({bool red = false}) =>
-      'bases/stone_turret${red ? '_red' : ''}.png';
+  static String turret(String era, {bool red = false}) => 'bases/${era}_turret${_red(red)}.png';
 
-  /// The catapult right after a throw.
-  static String turretFire({bool red = false}) =>
-      'bases/stone_turret_fire${red ? '_red' : ''}.png';
+  /// The turret right after a shot.
+  static String turretFire(String era, {bool red = false}) =>
+      'bases/${era}_turret_fire${_red(red)}.png';
 
-  static const bgSky = 'bg/stone_sky.png';
-  static const bgHills = 'bg/stone_hills.png';
-  static const bgNear = 'bg/stone_near.png';
+  static String bg(String era, String layer) => 'bg/${era}_$layer.png';
 
-  static const stone = 'fx/stone.png';
-  static const rock = 'fx/rock.png';
-  static const meteor = 'fx/meteor.png';
-  static const blast = 'fx/blast.png';
+  /// Effects by name (projectiles, specials, blasts).
+  static String fx(String name) => 'fx/$name.png';
 
-  static List<String> all(Iterable<String> sprites) => [
-    for (final s in sprites)
+  /// Stones and rocks tumble in flight; arrows and bolts point where
+  /// they fly.
+  static const spinning = {'stone', 'rock'};
+
+  /// Drawn width in world units; height follows the picture.
+  static double fxWidth(String name) => switch (name) {
+    'stone' => 12,
+    'rock' => 22,
+    'medieval_arrow' => 30,
+    'medieval_bolt' => 44,
+    _ => 20,
+  };
+
+  /// Everything one era draws in battle.
+  static List<String> era(EraDef e) => [
+    for (final u in e.units)
       for (final a in unitAnims)
-        for (final red in [false, true]) unit(s, a, red: red),
+        for (final red in [false, true]) unit(u, a, red: red),
     for (final red in [false, true]) ...[
-      base(red: red),
-      cliff(red: red),
-      turret(red: red),
-      turretFire(red: red),
+      base(e.id, red: red),
+      cliff(e.id, red: red),
+      turret(e.id, red: red),
+      turretFire(e.id, red: red),
     ],
-    bgSky,
-    bgHills,
-    bgNear,
-    stone,
-    rock,
-    meteor,
-    blast,
+    for (final l in bgLayers) bg(e.id, l),
+    ...{
+      for (final u in e.units)
+        if (u.ranged) fx(u.projectile),
+      fx(e.turret.projectile),
+      fx(e.meteor.sprite),
+      fx(e.meteor.blast),
+    },
   ];
+
+  static List<String> all(GameData data) => [for (final e in data.eras) ...era(e)];
 }
 
 /// Flutter `Image.asset` paths for HUD and menus.
 class UiImg {
   UiImg._();
 
-  static String unitIcon(String sprite) =>
-      'assets/images/icons/icon_$sprite.png';
+  static String icon(String name) => 'assets/images/icons/$name.png';
+
+  static String unitIcon(String sprite) => icon('icon_$sprite');
 
   /// Whole figure for menus; `red` = the enemy's colours.
   static String unitPose(String sprite, {bool red = false}) =>
       'assets/images/icons/pose_$sprite${red ? '_red' : ''}.png';
 
   /// Square head-and-shoulders portrait for the shop cards.
-  static String unitCard(String sprite) =>
-      'assets/images/icons/card_$sprite.png';
-  static const turret = 'assets/images/icons/icon_turret.png';
-  static const meteor = 'assets/images/icons/icon_meteor.png';
-  static const evolve = 'assets/images/icons/icon_evolve.png';
+  static String unitCard(String sprite) => 'assets/images/icons/card_$sprite.png';
+
+  /// An era's HUD icons (special, evolve, turret), from units.json.
+  static String special(EraDef e) => icon(e.icon('special', 'icon_meteor'));
+  static String evolve(EraDef e) => icon(e.icon('evolve', 'icon_evolve'));
+  static String turret(EraDef e) => icon(e.icon('turret', 'icon_turret'));
+
   static const gold = 'assets/images/icons/icon_gold.png';
   static const xp = 'assets/images/icons/icon_xp.png';
   static const star = 'assets/images/ui/star.png';

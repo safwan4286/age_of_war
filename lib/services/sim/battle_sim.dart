@@ -52,6 +52,7 @@ class SimProjectile {
     required this.damage,
     required this.speed,
     this.slot = -1,
+    this.sprite = 'stone',
   }) : startX = x;
 
   final int id;
@@ -68,6 +69,9 @@ class SimProjectile {
 
   /// Turret ledge it was fired from, or -1 for a unit's shot.
   final int slot;
+
+  /// fx image name the view draws.
+  final String sprite;
   bool done = false;
 
   /// 0 → 1 along the flight, for the arc the view draws.
@@ -79,9 +83,25 @@ class SimProjectile {
 }
 
 class MeteorImpact {
-  MeteorImpact({required this.caster, required this.x, required this.at});
+  MeteorImpact({
+    required this.caster,
+    required this.x,
+    required this.at,
+    this.sprite = 'meteor',
+    this.blast = 'blast',
+    this.size = 110,
+    this.blastSize = 160,
+  });
 
   final Side caster;
+
+  /// Drawn widths (world units) of the falling thing and its impact.
+  final double size;
+  final double blastSize;
+
+  /// fx image names: the falling thing and its impact.
+  final String sprite;
+  final String blast;
   final double x;
 
   /// Sim time of the impact.
@@ -95,6 +115,9 @@ class SideState {
 
   double gold;
   int xp = 0;
+
+  /// Index into GameData.eras.
+  int era = 0;
   double baseHp;
   final List<UnitDef> queue = [];
   double trainLeft = 0;
@@ -125,12 +148,13 @@ enum SimEventType {
   turretBought,
   turretSold,
   upgraded,
+  evolved,
   gameOver,
 }
 
 /// Something the view may want to show (floating gold, a flash, a shake).
 class SimEvent {
-  const SimEvent(this.type, this.side, {this.unitId = -1, this.x = 0, this.amount = 0});
+  const SimEvent(this.type, this.side, {this.unitId = -1, this.x = 0, this.amount = 0, this.meteor});
 
   final SimEventType type;
 
@@ -139,6 +163,9 @@ class SimEvent {
   final int unitId;
   final double x;
   final double amount;
+
+  /// For meteorImpact: which one landed (its blast art).
+  final MeteorImpact? meteor;
 }
 
 enum BattleOutcome { victory, defeat }
@@ -195,17 +222,28 @@ class BattleSim {
   /// Living units plus the ones in training; capped at [GameData.popCap].
   int population(Side s) => aliveOf(s).length + this[s].queue.length;
 
-  bool meteorReady(Side s) => this[s].meteorCharge >= data.meteor.cooldown;
+  /// The era a side is in.
+  EraDef eraOf(Side s) => data.era(this[s].era);
+
+  /// Full base health for a side in its current era.
+  double maxHp(Side s) => eraOf(s).baseHp;
+
+  bool meteorReady(Side s) => this[s].meteorCharge >= eraOf(s).meteor.cooldown;
 
   double meteorFraction(Side s) =>
-      (this[s].meteorCharge / data.meteor.cooldown).clamp(0.0, 1.0);
+      (this[s].meteorCharge / eraOf(s).meteor.cooldown).clamp(0.0, 1.0);
 
-  bool get canEvolve => this[Side.player].xp >= data.evolveXp;
+  /// XP a side needs to leave its era; 0 in the last era.
+  int evolveXpOf(Side s) => this[s].era < data.eras.length - 1 ? eraOf(s).evolveXp : 0;
+
+  bool canEvolveSide(Side s) => evolveXpOf(s) > 0 && this[s].xp >= evolveXpOf(s);
+
+  bool get canEvolve => canEvolveSide(Side.player);
 
   /// 3 stars = base above 66%, 2 = above 33%, else 1. 0 when lost.
   int get stars {
     if (outcome != BattleOutcome.victory) return 0;
-    final f = this[Side.player].baseHp / data.baseHp;
+    final f = this[Side.player].baseHp / maxHp(Side.player);
     if (f > 0.66) return 3;
     if (f > 0.33) return 2;
     return 1;
@@ -225,6 +263,8 @@ class BattleSim {
   bool queueUnit(Side s, String unitId) {
     if (outcome != null) return false;
     final d = data.unit(unitId);
+    // Only the side's current era is for sale.
+    if (d.era != eraOf(s).id) return false;
     final st = this[s];
     if (st.queue.length >= data.queueMax || st.gold < d.cost) return false;
     if (population(s) >= data.popCap) return false;
@@ -239,8 +279,9 @@ class BattleSim {
     final st = this[s];
     final i = slot ?? st.turrets.indexOf(false);
     if (outcome != null || i < 0 || i >= st.turrets.length) return false;
-    if (st.turrets[i] || st.gold < data.turret.cost) return false;
-    st.gold -= data.turret.cost;
+    final cost = eraOf(s).turret.cost;
+    if (st.turrets[i] || st.gold < cost) return false;
+    st.gold -= cost;
     st.turrets[i] = true;
     st.turretCooldowns[i] = 0;
     _events.add(SimEvent(SimEventType.turretBought, s, unitId: i));
@@ -253,7 +294,7 @@ class BattleSim {
     if (outcome != null || slot < 0 || slot >= st.turrets.length) return false;
     if (!st.turrets[slot]) return false;
     st.turrets[slot] = false;
-    st.gold += data.turret.sellBack;
+    st.gold += eraOf(s).turret.sellBack;
     _events.add(SimEvent(SimEventType.turretSold, s, unitId: slot));
     return true;
   }
@@ -300,15 +341,30 @@ class BattleSim {
   double damageTaken(SimUnit u) =>
       (1 - bonus(u.side, _classOf(u.def), UpgradeStat.armor)).clamp(0.2, 1.0);
 
-  double turretDamage(Side s) => data.turret.damage * (1 + bonus(s, UpgradeTarget.turret, UpgradeStat.damage));
+  double turretDamage(Side s) =>
+      eraOf(s).turret.damage * (1 + bonus(s, UpgradeTarget.turret, UpgradeStat.damage));
 
-  double turretRange(Side s) => data.turret.range * (1 + bonus(s, UpgradeTarget.turret, UpgradeStat.range));
+  double turretRange(Side s) =>
+      eraOf(s).turret.range * (1 + bonus(s, UpgradeTarget.turret, UpgradeStat.range));
+
+  /// Moves a side into the next era: new roster, turret type, special and
+  /// a stronger base (it gains the difference in full health). Units
+  /// already on the lane and in training stay as they are.
+  bool evolve(Side s) {
+    if (outcome != null || !canEvolveSide(s)) return false;
+    final st = this[s];
+    final before = maxHp(s);
+    st.era++;
+    st.baseHp += maxHp(s) - before;
+    _events.add(SimEvent(SimEventType.evolved, s, amount: st.era.toDouble()));
+    return true;
+  }
 
   /// Rains meteors over the other side's army (only its units get hurt).
   /// With no army on the lane, the rocks fall on the other side's half.
   bool castMeteor(Side s) {
     if (outcome != null || !meteorReady(s)) return false;
-    final m = data.meteor;
+    final m = eraOf(s).meteor;
     this[s].meteorCharge = 0;
     final (lo, hi) = meteorZone(s);
     for (var i = 0; i < m.count; i++) {
@@ -318,6 +374,10 @@ class BattleSim {
           x: lo + rng.nextDouble() * (hi - lo),
           // Each meteor falls for 0.4 s before it lands.
           at: time + 0.4 + m.duration * i / m.count,
+          sprite: m.sprite,
+          blast: m.blast,
+          size: m.size,
+          blastSize: m.blastSize,
         ),
       );
     }
@@ -334,7 +394,7 @@ class BattleSim {
       final half = data.laneLength / 2;
       return caster == Side.player ? (half, laneHi) : (laneLo, half);
     }
-    final r = data.meteor.radius / 2;
+    final r = eraOf(caster).meteor.radius / 2;
     final lo = xs.reduce(math.min) - r, hi = xs.reduce(math.max) + r;
     return (math.max(laneLo, lo), math.min(laneHi, hi));
   }
@@ -365,8 +425,9 @@ class BattleSim {
   void _economy(Side s, double dt) {
     final st = this[s];
     st.gold += data.trickle * dt * incomeMultiplier(s);
-    if (st.meteorCharge < data.meteor.cooldown) {
-      st.meteorCharge = math.min(data.meteor.cooldown, st.meteorCharge + dt);
+    final cd = eraOf(s).meteor.cooldown;
+    if (st.meteorCharge < cd) {
+      st.meteorCharge = math.min(cd, st.meteorCharge + dt);
     }
     if (st.queue.isNotEmpty) st.trainLeft -= dt;
   }
@@ -515,6 +576,7 @@ class BattleSim {
         targetId: target?.id ?? -1,
         damage: dmg,
         speed: u.def.projectileSpeed,
+        sprite: u.def.projectile,
       );
     } else if (target != null) {
       _damageUnit(target, dmg, by: u.side);
@@ -541,7 +603,8 @@ class BattleSim {
         st.turretCooldowns[i] = cd > 0 ? cd : 0;
         continue;
       }
-      st.turretCooldowns[i] = data.turret.attackEvery;
+      final t = eraOf(s).turret;
+      st.turretCooldowns[i] = t.attackEvery;
       _shoot(
         side: s,
         kind: ProjectileKind.rock,
@@ -549,8 +612,9 @@ class BattleSim {
         targetX: best.x,
         targetId: best.id,
         damage: turretDamage(s),
-        speed: data.turret.projectileSpeed,
+        speed: t.projectileSpeed,
         slot: i,
+        sprite: t.projectile,
       );
     }
   }
@@ -564,6 +628,7 @@ class BattleSim {
     required double damage,
     required double speed,
     int slot = -1,
+    String sprite = 'stone',
   }) {
     final p = SimProjectile(
       id: _nextId++,
@@ -575,6 +640,7 @@ class BattleSim {
       damage: damage,
       speed: speed,
       slot: slot,
+      sprite: sprite,
     );
     projectiles.add(p);
     _events.add(SimEvent(SimEventType.projectile, side, unitId: p.id, x: fromX));
@@ -612,12 +678,13 @@ class BattleSim {
   void _meteors() {
     for (final m in meteors) {
       if (m.at > time) continue;
+      final def = eraOf(m.caster).meteor;
       for (final u in aliveOf(m.caster.other).toList()) {
-        if ((u.x - m.x).abs() <= data.meteor.radius) {
-          _damageUnit(u, data.meteor.damage, by: m.caster);
+        if ((u.x - m.x).abs() <= def.radius) {
+          _damageUnit(u, def.damage, by: m.caster);
         }
       }
-      _events.add(SimEvent(SimEventType.meteorImpact, m.caster, x: m.x));
+      _events.add(SimEvent(SimEventType.meteorImpact, m.caster, x: m.x, meteor: m));
     }
     meteors.removeWhere((m) => m.at <= time);
   }

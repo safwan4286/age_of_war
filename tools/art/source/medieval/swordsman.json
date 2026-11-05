@@ -1,0 +1,45 @@
+{
+  "height": 210,
+  "worldHeight": 108,
+  "width": 40,
+  "pick": {
+    "idle": [
+      0,
+      2,
+      4,
+      6,
+      8,
+      10,
+      12,
+      14
+    ],
+    "attack": [
+      0,
+      10,
+      14,
+      32,
+      34,
+      38,
+      50,
+      56
+    ],
+    "die": [
+      10,
+      14,
+      22,
+      30,
+      34,
+      38,
+      40,
+      44
+    ]
+  },
+  "frameTimes": {
+    "idle": 0.15,
+    "walk": 0.11
+  },
+  "sprite": "swordsman",
+  "era": "medieval",
+  "frames": "frames",
+  "walk": "loop"
+}

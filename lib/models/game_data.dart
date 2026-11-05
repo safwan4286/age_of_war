@@ -12,6 +12,9 @@ enum Difficulty {
   };
 }
 
+/// Battle roles shared by every era's roster.
+enum UnitRole { melee, ranged, heavy, elite }
+
 /// One unit type, read from assets/data/units.json.
 class UnitDef {
   const UnitDef({
@@ -35,8 +38,12 @@ class UnitDef {
     this.auraRadius = 0,
     this.drawScale = 1,
     this.headY = 0,
+    this.role = UnitRole.melee,
+    this.era = 'stone',
+    this.projectile = 'stone',
     this.frames = defaultFrames,
     this.frameTimes = const {},
+    this.impactFrame = -1,
   });
 
   final String id;
@@ -72,15 +79,28 @@ class UnitDef {
   /// goes); 0 = use the frame height.
   final double headY;
 
+  /// What the unit is for (the AI picks by role, so it works in any era).
+  final UnitRole role;
+
+  /// Era id; also the prefix of its art files.
+  final String era;
+
+  /// Ranged units: fx image name of the shot.
+  final String projectile;
+
   /// Frames per animation strip. Units built from the 4-row sheets use
   /// the defaults; units assembled from separate frames can have more.
   final Map<String, int> frames;
 
   static const defaultFrames = {'idle': 4, 'walk': 6, 'attack': 6, 'die': 6};
 
-  /// Seconds per frame for idle / walk when the art needs its own pace
-  /// (attack and die are timed by the sim).
+  /// Seconds per frame when the art needs its own pace (idle, walk,
+  /// attack). Without one, the attack is stretched over attackEvery and
+  /// die over the dying time.
   final Map<String, double> frameTimes;
+
+  /// The attack frame where the blow lands (-1 = half-way).
+  final int impactFrame;
 
   int frameCount(String anim) => frames[anim] ?? defaultFrames[anim] ?? 6;
 
@@ -109,14 +129,18 @@ class UnitDef {
     auraRadius: m.dbl('auraRadius'),
     drawScale: m.dbl('drawScale', 1),
     headY: m.dbl('headY'),
+    role: UnitRole.values.where((r) => r.name == m['role']).firstOrNull ?? UnitRole.melee,
+    era: m.str('era', 'stone'),
+    projectile: m.str('projectile', 'stone'),
     frames: {
       for (final e in defaultFrames.entries)
         e.key: m.sub('frames').integer(e.key, e.value),
     },
     frameTimes: {
-      for (final k in const ['idle', 'walk'])
+      for (final k in const ['idle', 'walk', 'attack'])
         if (m.sub('frameTimes')[k] is num) k: m.sub('frameTimes').dbl(k),
     },
+    impactFrame: m.integer('impactFrame', -1),
   );
 }
 
@@ -130,8 +154,14 @@ class TurretDef {
     required this.sellBack,
     required this.projectileSpeed,
     this.slots = 3,
+    this.id = 'rock_thrower',
+    this.projectile = 'rock',
   });
 
+  final String id;
+
+  /// fx image name of its shot.
+  final String projectile;
   final String name;
   final int cost;
   final double damage;
@@ -152,6 +182,8 @@ class TurretDef {
     sellBack: m.integer('sellBack', 50),
     projectileSpeed: m.dbl('projectileSpeed', 420),
     slots: m.integer('slots', 3),
+    id: m.str('id', 'rock_thrower'),
+    projectile: m.str('projectile', 'rock'),
   );
 }
 
@@ -162,8 +194,23 @@ class MeteorDef {
     required this.duration,
     required this.damage,
     required this.radius,
+    this.name = 'Meteor',
+    this.sprite = 'meteor',
+    this.blast = 'blast',
+    this.size = 110,
+    this.blastSize = 160,
   });
 
+  /// Shown on the HUD; the sim treats every era's special the same way.
+  final String name;
+
+  /// fx image names: the falling thing and its impact (square frames).
+  final String sprite;
+  final String blast;
+
+  /// Drawn widths in world units: the falling thing and its impact.
+  final double size;
+  final double blastSize;
   final double cooldown;
   final int count;
   final double duration;
@@ -176,6 +223,11 @@ class MeteorDef {
     duration: m.dbl('duration', 2),
     damage: m.dbl('damage', 60),
     radius: m.dbl('radius', 60),
+    name: m.str('name', 'Meteor'),
+    sprite: m.str('sprite', 'meteor'),
+    blast: m.str('blast', 'blast'),
+    size: m.dbl('size', 110),
+    blastSize: m.dbl('blastSize', 160),
   );
 }
 
@@ -310,6 +362,75 @@ class LayerPlace {
       LayerPlace(top: m.dbl('top'), height: m.dbl('height', 540));
 }
 
+/// One age: its roster, turret, special, base art, background and the
+/// XP needed to evolve out of it.
+class EraDef {
+  const EraDef({
+    required this.id,
+    required this.name,
+    required this.units,
+    required this.turret,
+    required this.meteor,
+    this.baseArt = const BaseArt(),
+    this.layers = const {},
+    this.baseHp = 1000,
+    this.evolveXp = 0,
+    this.icons = const {},
+  });
+
+  final String id;
+  final String name;
+
+  /// Shop order.
+  final List<UnitDef> units;
+  final TurretDef turret;
+
+  /// The era's special (meteor, arrow rain...).
+  final MeteorDef meteor;
+  final BaseArt baseArt;
+  final Map<String, LayerPlace> layers;
+
+  /// The base's full health in this era.
+  final double baseHp;
+
+  /// XP needed to evolve to the next era (0 = last era).
+  final int evolveXp;
+
+  /// HUD icon names: special, evolve, turret.
+  final Map<String, String> icons;
+
+  LayerPlace layer(String name) => layers[name] ?? const LayerPlace();
+
+  String icon(String key, String fallback) => icons[key] ?? fallback;
+
+  UnitDef? byRole(UnitRole r) => units.where((u) => u.role == r).firstOrNull;
+
+  static EraDef fromMap(Map<dynamic, dynamic> m, {String fallbackId = 'stone', int fallbackXp = 0}) {
+    final id = m.str('id', fallbackId);
+    final special = m['special'] is Map ? m.sub('special') : m.sub('meteor');
+    return EraDef(
+      id: id,
+      name: m.str('name', id),
+      units: [
+        for (final u in m.subs('units')) UnitDef.fromMap({...u, 'era': u['era'] ?? id}),
+      ],
+      turret: TurretDef.fromMap(m.sub('turret')),
+      meteor: MeteorDef.fromMap(special),
+      baseArt: BaseArt.fromMap(m.sub('base').sub('art')),
+      layers: {
+        for (final e in m.sub('world').sub('layers').entries)
+          if (e.value is Map) '${e.key}': LayerPlace.fromMap(e.value as Map),
+      },
+      baseHp: m['baseHp'] is num ? m.dbl('baseHp') : m.sub('base').dbl('hp', 1000),
+      evolveXp: m.integer('evolveXp', fallbackXp),
+      icons: {
+        for (final e in m.sub('icons').entries)
+          if (e.value is String) '${e.key}': e.value as String,
+      },
+    );
+  }
+}
+
 /// Everything balance-related, from one JSON file so tuning needs no code.
 class GameData {
   const GameData({
@@ -320,14 +441,8 @@ class GameData {
     required this.trickle,
     required this.queueMax,
     this.popCap = 10,
-    this.baseArt = const BaseArt(),
-    this.layers = const {},
     this.upgrades = const [],
-    required this.evolveXp,
-    required this.baseHp,
-    required this.turret,
-    required this.meteor,
-    required this.units,
+    required this.eras,
     required this.ai,
   });
 
@@ -347,26 +462,31 @@ class GameData {
   /// Most units a side can have alive + in training.
   final int popCap;
 
-  /// Where things sit on the base picture (view only).
-  final BaseArt baseArt;
-
-  /// Background layer placement by name: sky, hills, near (view only).
-  final Map<String, LayerPlace> layers;
-
-  LayerPlace layer(String name) => layers[name] ?? const LayerPlace();
-
   /// Battle upgrades, in the order the upgrade menu shows them.
   final List<UpgradeDef> upgrades;
 
-  UpgradeDef? upgrade(String id) => upgrades.where((u) => u.id == id).firstOrNull;
-  final int evolveXp;
-  final double baseHp;
-  final TurretDef turret;
-  final MeteorDef meteor;
-  final List<UnitDef> units;
+  /// The ages in order; every side starts in the first.
+  final List<EraDef> eras;
   final Map<Difficulty, AiDef> ai;
 
+  UpgradeDef? upgrade(String id) => upgrades.where((u) => u.id == id).firstOrNull;
+
+  EraDef era(int i) => eras[i.clamp(0, eras.length - 1)];
+
+  EraDef eraOf(UnitDef u) => eras.firstWhere((e) => e.id == u.era, orElse: () => eras.first);
+
+  /// Every unit of every era.
+  List<UnitDef> get units => [for (final e in eras) ...e.units];
+
   UnitDef unit(String id) => units.firstWhere((u) => u.id == id);
+
+  // First-era shortcuts (the start of every battle).
+  BaseArt get baseArt => eras.first.baseArt;
+  LayerPlace layer(String name) => eras.first.layer(name);
+  int get evolveXp => eras.first.evolveXp;
+  double get baseHp => eras.first.baseHp;
+  TurretDef get turret => eras.first.turret;
+  MeteorDef get meteor => eras.first.meteor;
 
   AiDef aiFor(Difficulty d) => ai[d] ?? const AiDef(
     income: 1,
@@ -379,6 +499,7 @@ class GameData {
     final lane = m.sub('lane');
     final eco = m.sub('economy');
     final ai = m.sub('ai');
+    final rawEras = m.subs('eras');
     return GameData(
       laneLength: lane.dbl('length', 1600),
       baseWidth: lane.dbl('baseWidth', 120),
@@ -387,16 +508,10 @@ class GameData {
       trickle: eco.dbl('trickle', 2),
       queueMax: eco.integer('queueMax', 5),
       popCap: eco.integer('popCap', 10),
-      baseArt: BaseArt.fromMap(m.sub('base').sub('art')),
-      layers: {
-        for (final e in m.sub('world').sub('layers').entries)
-          if (e.value is Map) '${e.key}': LayerPlace.fromMap(e.value as Map),
-      },
-      evolveXp: eco.integer('evolveXp', 4000),
-      baseHp: m.sub('base').dbl('hp', 1000),
-      turret: TurretDef.fromMap(m.sub('turret')),
-      meteor: MeteorDef.fromMap(m.sub('meteor')),
-      units: [for (final u in m.subs('units')) UnitDef.fromMap(u)],
+      // Older files have one era at the top level.
+      eras: rawEras.isNotEmpty
+          ? [for (final e in rawEras) EraDef.fromMap(e)]
+          : [EraDef.fromMap(m, fallbackXp: eco.integer('evolveXp', 4000))],
       upgrades: [
         for (final u in m.subs('upgrades')) ?UpgradeDef.fromMap(u),
       ],

@@ -1,0 +1,49 @@
+{
+  "_note": "Test build from the 3 sheets made from the side-profile master. Death still comes from the old Veo strip until a new death sheet exists.",
+  "sprite": "swordsman",
+  "era": "medieval",
+  "worldHeight": 108,
+  "width": 40,
+  "sheets": {
+    "walk": {
+      "file": "swordsman_walk.png",
+      "cols": 4,
+      "count": 16,
+      "anchor": "median"
+    },
+    "idle": {
+      "file": "swordsman_idle.png",
+      "cols": 5,
+      "count": 23,
+      "anchor": "first"
+    },
+    "attack": {
+      "file": "swordsman_attack.png",
+      "cols": 5,
+      "count": 25,
+      "anchor": "first",
+      "drop": [
+        8,
+        20,
+        21,
+        22,
+        23,
+        24
+      ]
+    }
+  },
+  "fromStrip": {
+    "die": {
+      "file": "old_swordsman_die.png",
+      "figureHeight": 210
+    }
+  },
+  "frameTimes": {
+    "idle": 0.0667,
+    "walk": 0.0833,
+    "attack": 0.0667
+  },
+  "impactFrame": 8,
+  "_impact": "impactFrame counts frames after the dropped ones: 8 = the first full thrust.",
+  "_fps": "15 fps, the speed the sprite tool previews at."
+}

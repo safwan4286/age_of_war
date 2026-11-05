@@ -9,7 +9,7 @@ void main() {
     final data = loadData();
 
     test('has the Stone Age units in shop order', () {
-      expect(data.units.map((u) => u.id).toList(), [
+      expect(data.era(0).units.map((u) => u.id).toList(), [
         'clubman',
         'slinger',
         'dinorider',
@@ -37,11 +37,28 @@ void main() {
       }
     });
 
-    test('only the slinger is ranged and only the chief has an aura', () {
-      expect(data.units.where((u) => u.ranged).map((u) => u.id), ['slinger']);
-      expect(data.units.where((u) => u.auraBonus > 0).map((u) => u.id), [
-        'chief',
-      ]);
+    test('each era has one unit per role; ranged and aura units match roles', () {
+      expect(data.eras.map((e) => e.id), ['stone', 'medieval']);
+      for (final e in data.eras) {
+        expect(e.units.map((u) => u.role), UnitRole.values, reason: e.id);
+        expect(e.units.where((u) => u.ranged).map((u) => u.role), [UnitRole.ranged], reason: e.id);
+        expect(e.units.where((u) => u.auraBonus > 0).map((u) => u.role), [UnitRole.elite], reason: e.id);
+        for (final u in e.units) {
+          expect(u.era, e.id, reason: u.id);
+        }
+      }
+      expect(data.era(1).units.map((u) => u.id), ['swordsman', 'archer', 'knight', 'king']);
+    });
+
+    test('later eras are stronger: base, turret and every role', () {
+      final a = data.era(0), b = data.era(1);
+      expect(b.baseHp, greaterThan(a.baseHp));
+      expect(b.turret.damage, greaterThan(a.turret.damage));
+      for (final r in UnitRole.values) {
+        expect(b.byRole(r)!.hp, greaterThan(a.byRole(r)!.hp), reason: r.name);
+      }
+      expect(a.evolveXp, greaterThan(0));
+      expect(b.evolveXp, 0, reason: 'last era');
     });
 
     test('base art has one ledge per turret slot; population cap is 10', () {

@@ -45,6 +45,11 @@ class EnemyAi {
 
   void think() {
     final st = sim[me];
+    // Every difficulty evolves as soon as it can, like a player would.
+    if (sim.canEvolveSide(me)) {
+      sim.evolve(me);
+      return;
+    }
     if (def.useMeteor &&
         sim.meteorReady(me) &&
         (enemiesInMyHalf() >= meteorThreshold ||
@@ -54,7 +59,7 @@ class EnemyAi {
     if (def.buyTurret &&
         st.turretCount < maxTurrets &&
         sim.time >= (st.turretCount == 0 ? turretAt : 60) &&
-        st.gold >= sim.data.turret.cost + (st.turretCount == 0 ? 0 : 150)) {
+        st.gold >= sim.eraOf(me).turret.cost + (st.turretCount == 0 ? 0 : 150)) {
       sim.buyTurret(me);
       return;
     }
@@ -119,59 +124,66 @@ class EnemyAi {
   }
 
   /// Which unit to train next, or null to wait (broke, or saving up).
+  /// Picks by role so the same plan works in every era.
   String? choose() {
     final gold = sim[me].gold;
-    final affordable = sim.data.units.where((u) => u.cost <= gold).toList();
+    final era = sim.eraOf(me);
+    final affordable = era.units.where((u) => u.cost <= gold).toList();
     if (affordable.isEmpty) return null;
-    return switch (level) {
+    final role = switch (level) {
       Difficulty.easy => _easy(affordable),
       Difficulty.normal => _normal(affordable),
       Difficulty.hard => _hard(affordable, gold),
     };
+    return role == null ? null : era.byRole(role)?.id;
   }
 
   /// Random pick, leaning toward cheap units.
-  String _easy(List<UnitDef> affordable) {
-    const weights = {'clubman': 4, 'slinger': 3, 'dinorider': 1, 'chief': 1};
-    final total = affordable.fold<int>(0, (s, u) => s + (weights[u.id] ?? 1));
+  UnitRole _easy(List<UnitDef> affordable) {
+    const weights = {UnitRole.melee: 4, UnitRole.ranged: 3, UnitRole.heavy: 1, UnitRole.elite: 1};
+    final total = affordable.fold<int>(0, (s, u) => s + (weights[u.role] ?? 1));
     var roll = sim.rng.nextInt(total);
     for (final u in affordable) {
-      roll -= weights[u.id] ?? 1;
-      if (roll < 0) return u.id;
+      roll -= weights[u.role] ?? 1;
+      if (roll < 0) return u.role;
     }
-    return affordable.first.id;
+    return affordable.first.role;
   }
 
   /// Counter the player's mix: charge ranged-heavy armies, keep a front
-  /// line with slingers behind it otherwise.
-  String _normal(List<UnitDef> affordable) {
-    bool can(String id) => affordable.any((u) => u.id == id);
+  /// line with ranged units behind it otherwise.
+  UnitRole _normal(List<UnitDef> affordable) {
+    bool can(UnitRole r) => affordable.any((u) => u.role == r);
     final theirs = sim.aliveOf(me.other).toList();
     final theirRanged = theirs.where((u) => u.def.ranged).length;
     final theirMelee = theirs.length - theirRanged;
     final myMelee = sim.aliveOf(me).where((u) => !u.def.ranged).length;
+    final elite = sim.eraOf(me).byRole(UnitRole.elite);
 
-    if (can('chief') && sim.time > 90 && sim[me].gold >= 450) return 'chief';
-    if (theirRanged > theirMelee) {
-      if (can('dinorider')) return 'dinorider';
-      return 'clubman';
+    if (can(UnitRole.elite) && sim.time > 90 && sim[me].gold >= (elite?.cost ?? 350) + 100) {
+      return UnitRole.elite;
     }
-    if (myMelee < 2) return 'clubman';
-    if (can('slinger')) return 'slinger';
-    return 'clubman';
+    if (theirRanged > theirMelee) {
+      if (can(UnitRole.heavy)) return UnitRole.heavy;
+      return UnitRole.melee;
+    }
+    if (myMelee < 2) return UnitRole.melee;
+    if (can(UnitRole.ranged)) return UnitRole.ranged;
+    return UnitRole.melee;
   }
 
-  /// Like Normal, but saves for Dino Riders and Chiefs when not pressed.
-  String? _hard(List<UnitDef> affordable, double gold) {
-    bool can(String id) => affordable.any((u) => u.id == id);
+  /// Like Normal, but saves for heavy and elite units when not pressed.
+  UnitRole? _hard(List<UnitDef> affordable, double gold) {
+    bool can(UnitRole r) => affordable.any((u) => u.role == r);
     final threat = underThreat();
     final myAlive = sim.aliveOf(me).length;
+    final elite = sim.eraOf(me).byRole(UnitRole.elite);
 
-    if (can('chief') && gold >= 450) return 'chief';
-    if (can('dinorider') && (sim.time > hardSaveAfter || threat)) {
-      return 'dinorider';
+    if (can(UnitRole.elite) && gold >= (elite?.cost ?? 350) + 100) return UnitRole.elite;
+    if (can(UnitRole.heavy) && (sim.time > hardSaveAfter || threat)) {
+      return UnitRole.heavy;
     }
-    if (threat && myAlive < 2) return can('slinger') ? 'slinger' : 'clubman';
+    if (threat && myAlive < 2) return can(UnitRole.ranged) ? UnitRole.ranged : UnitRole.melee;
     if (sim.time > hardSaveAfter && myAlive >= 2) return null;
     return _normal(affordable);
   }

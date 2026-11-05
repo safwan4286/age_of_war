@@ -1,8 +1,10 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../resources/assets.dart';
 import '../../../resources/theme.dart';
+import '../../../services/sim/battle_sim.dart';
 import '../../../services/responsiveness/device_manager.dart';
 import '../../../widgets/game_ui.dart';
 import '../battle_controller.dart';
@@ -30,7 +32,7 @@ class HudTop extends GetView<BattleController> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Obx(() => _Health(value: c.playerHp.value, color: Pal.leaf, who: 'Your cave')),
+                  Obx(() => _Health(value: c.playerHp.value, color: Pal.leaf, who: 'Your base')),
                   SizedBox(height: 6.sp),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -42,25 +44,29 @@ class HudTop extends GetView<BattleController> {
                             children: [
                               Obx(
                                 () => SpecialTile(
-                                  icon: UiImg.meteor,
+                                  icon: UiImg.special(c.playerEra),
                                   ready: c.meteorReady,
                                   fill: c.meteorFraction.value,
                                   semantics: c.meteorReady
-                                      ? 'Meteor strike ready'
-                                      : 'Meteor strike charging, ${(c.meteorFraction.value * 100).floor()} percent',
+                                      ? '${c.playerEra.meteor.name} ready'
+                                      : '${c.playerEra.meteor.name} charging, ${(c.meteorFraction.value * 100).floor()} percent',
                                   onTap: c.castMeteor,
                                 ),
                               ),
                               SizedBox(width: 6.sp),
                               Obx(
                                 () => SpecialTile(
-                                  icon: UiImg.evolve,
+                                  icon: UiImg.evolve(c.playerEra),
                                   ready: c.canEvolve,
-                                  fill: (c.xp.value / c.evolveXp).clamp(0.0, 1.0),
-                                  semantics: c.canEvolve
+                                  fill: c.evolveFraction,
+                                  semantics: c.lastEra
+                                      ? '${c.playerEra.name}, the last age for now'
+                                      : c.canEvolve
                                       ? 'Evolve to the next age'
                                       : 'Evolve needs ${c.evolveXp} XP',
                                   onTap: c.tapEvolve,
+                                  // Testing: long-press evolves instantly.
+                                  onLongPress: kDebugMode ? c.debugEvolve : null,
                                 ),
                               ),
                             ],
@@ -68,12 +74,14 @@ class HudTop extends GetView<BattleController> {
                           SizedBox(height: 4.sp),
                           Obx(
                             () => Semantics(
-                              label: '${c.xp.value} of ${c.evolveXp} experience',
+                              label: c.lastEra
+                                  ? '${c.xp.value} experience'
+                                  : '${c.xp.value} of ${c.evolveXp} experience',
                               excludeSemantics: true,
                               child: GameBar(
-                                value: c.xp.value / c.evolveXp,
+                                value: c.evolveFraction,
                                 color: Pal.xp,
-                                label: '${c.xp.value} XP',
+                                label: c.lastEra ? 'MAX AGE' : '${c.xp.value} XP',
                                 width: 2 * SpecialTile.side + 6,
                                 height: 11,
                               ),
@@ -120,12 +128,16 @@ class HudTop extends GetView<BattleController> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Obx(
-                    () => _Health(
-                      value: c.enemyHp.value,
-                      color: Pal.ember,
-                      who: 'Enemy cave',
-                      reverse: true,
+                  // Testing: long-press the enemy's bar to evolve the enemy.
+                  GestureDetector(
+                    onLongPress: kDebugMode ? () => c.debugEvolve(Side.enemy) : null,
+                    child: Obx(
+                      () => _Health(
+                        value: c.enemyHp.value,
+                        color: Pal.ember,
+                        who: 'Enemy base',
+                        reverse: true,
+                      ),
                     ),
                   ),
                   SizedBox(height: 6.sp),
@@ -237,6 +249,7 @@ class SpecialTile extends StatefulWidget {
     required this.fill,
     required this.semantics,
     required this.onTap,
+    this.onLongPress,
   });
 
   /// Design units.
@@ -247,6 +260,7 @@ class SpecialTile extends StatefulWidget {
   final double fill;
   final String semantics;
   final VoidCallback onTap;
+  final VoidCallback? onLongPress;
 
   @override
   State<SpecialTile> createState() => _SpecialTileState();
@@ -275,6 +289,7 @@ class _SpecialTileState extends State<SpecialTile> with SingleTickerProviderStat
       excludeSemantics: true,
       child: GestureDetector(
         onTap: widget.onTap,
+        onLongPress: widget.onLongPress,
         child: AnimatedBuilder(
           animation: _pulse,
           builder: (context, child) => Container(

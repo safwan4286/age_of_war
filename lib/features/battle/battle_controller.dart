@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
@@ -45,6 +46,10 @@ class BattleController extends GetxController {
   /// Upgrade id -> level bought this battle.
   final upgrades = <String, int>{}.obs;
   final population = 0.obs;
+
+  /// Index into data.eras for each side (the HUD swaps shop and icons).
+  final era = 0.obs;
+  final enemyEra = 0.obs;
   final seconds = 0.obs;
   final speed = 1.obs;
   final overlay = BattleOverlay.none.obs;
@@ -52,14 +57,22 @@ class BattleController extends GetxController {
 
   static const tutorialSteps = 3;
 
-  UnitDef get chief => data.unit('chief');
-  int get evolveXp => data.evolveXp;
-  bool get canEvolve => xp.value >= data.evolveXp;
+  /// The player's current age: its units, turret and special.
+  EraDef get playerEra => data.era(era.value);
+  List<UnitDef> get shopUnits => playerEra.units;
+  bool get lastEra => era.value >= data.eras.length - 1;
+
+  /// XP needed for the next age; 0 in the last one.
+  int get evolveXp => lastEra ? 0 : playerEra.evolveXp;
+  bool get canEvolve => !lastEra && xp.value >= evolveXp;
+
+  /// XP bar fill toward the next age (full in the last one).
+  double get evolveFraction => evolveXp == 0 ? 1 : (xp.value / evolveXp).clamp(0.0, 1.0);
   bool get meteorReady => meteorFraction.value >= 1;
   int get popCap => data.popCap;
   bool get popFull => population.value >= data.popCap;
   bool get canBuildTurret =>
-      turrets.contains(false) && gold.value >= data.turret.cost;
+      turrets.contains(false) && gold.value >= playerEra.turret.cost;
 
   @override
   void onInit() {
@@ -68,6 +81,13 @@ class BattleController extends GetxController {
     difficulty = arg is Difficulty ? arg : Difficulty.easy;
     _start();
     if (!save.tutorialSeen) _open(BattleOverlay.tutorial);
+  }
+
+  @override
+  void onClose() {
+    // Battle art is big (two ages of unit strips); menus don't need it.
+    game.images.clearCache();
+    super.onClose();
   }
 
   void _start() {
@@ -104,8 +124,10 @@ class BattleController extends GetxController {
     final me = sim[Side.player];
     gold.value = me.gold.floor();
     xp.value = me.xp;
-    playerHp.value = me.baseHp / data.baseHp;
-    enemyHp.value = sim[Side.enemy].baseHp / data.baseHp;
+    era.value = me.era;
+    enemyEra.value = sim[Side.enemy].era;
+    playerHp.value = me.baseHp / sim.maxHp(Side.player);
+    enemyHp.value = sim[Side.enemy].baseHp / sim.maxHp(Side.enemy);
     final ids = me.queue.map((u) => u.id).toList();
     if (!_sameList(ids, queue)) queue.assignAll(ids);
     trainFraction.value = me.queue.isEmpty
@@ -147,6 +169,8 @@ class BattleController extends GetxController {
       switch (e.type) {
         case SimEventType.meteorImpact:
           _buzz(HapticFeedback.lightImpact);
+        case SimEventType.evolved when e.side == Side.enemy:
+          _buzz(HapticFeedback.mediumImpact);
         case SimEventType.baseHit when e.side == Side.player:
           final now = sim.time.floor();
           if (now != _lastBaseBuzz) {
@@ -179,7 +203,7 @@ class BattleController extends GetxController {
       kills: me.kills,
       goldEarned: me.goldEarned,
       xp: me.xp,
-      baseHpLeft: me.baseHp / data.baseHp,
+      baseHpLeft: me.baseHp / sim.maxHp(Side.player),
     );
     final played = round.value;
     result = await save.record(result);
@@ -250,12 +274,31 @@ class BattleController extends GetxController {
     _refresh();
   }
 
+  /// Evolves when the XP is there. In the last age it shows what's
+  /// coming instead.
   void tapEvolve() {
-    if (canEvolve) {
+    if (lastEra) {
       _open(BattleOverlay.evolveTeaser);
+    } else if (sim.evolve(Side.player)) {
+      _buzz(HapticFeedback.heavyImpact);
     } else {
       _buzz(HapticFeedback.vibrate);
     }
+    _refresh();
+  }
+
+  /// Testing only (debug builds): gives [side] the XP it needs and
+  /// evolves it right away. Long-press the Evolve tile for yourself, the
+  /// enemy's health bar for the enemy. Does nothing in release builds.
+  void debugEvolve([Side side = Side.player]) {
+    if (!kDebugMode) return;
+    final st = sim[side];
+    final need = sim.evolveXpOf(side);
+    if (need == 0) return; // already the last age
+    if (st.xp < need) st.xp = need;
+    sim.evolve(side);
+    _buzz(HapticFeedback.heavyImpact);
+    _refresh();
   }
 
   void toggleSpeed() {

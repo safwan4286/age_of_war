@@ -68,7 +68,7 @@ class _Card extends StatelessWidget {
 class _Tutorial extends GetView<BattleController> {
   const _Tutorial();
 
-  static const _steps = [
+  static final _steps = [
     (
       UiImg.gold,
       'TRAIN YOUR TRIBE',
@@ -80,7 +80,7 @@ class _Tutorial extends GetView<BattleController> {
       'Every kill pays more gold than the unit cost, plus XP. Fill the XP bar to unlock the next age.',
     ),
     (
-      UiImg.meteor,
+      UiImg.icon('icon_meteor'),
       'DEFEND & STRIKE',
       'Build Rock Throwers on your cave, buy upgrades with spare gold, and call the Meteor when it is charged. Drag the battlefield to look around. Destroy the enemy cave to win!',
     ),
@@ -149,12 +149,12 @@ class _EvolveTeaser extends GetView<BattleController> {
   @override
   Widget build(BuildContext context) {
     return _Card(
-      title: 'MEDIEVAL AGE',
+      title: 'NEW AGES SOON',
       children: [
-        const Center(child: GameImage(UiImg.evolve, size: 68)),
+        Center(child: GameImage(UiImg.evolve(controller.playerEra), size: 68)),
         SizedBox(height: 10.sp),
         Text(
-          'Your tribe is ready to evolve! Knights, archers and stone castles arrive in the next update.',
+          'You reached the last age for now. Gunpowder and beyond arrive in a later update.',
           textAlign: TextAlign.center,
           style: AppTheme.body(18),
         ),
@@ -173,14 +173,14 @@ class _Turrets extends GetView<BattleController> {
   @override
   Widget build(BuildContext context) {
     final c = controller;
-    final t = c.data.turret;
-    return Obx(
-      () => _Card(
+    return Obx(() {
+      final t = c.playerEra.turret;
+      return _Card(
         title: 'TURRETS',
         children: [
           Text(
             '${t.name}: ${t.damage.round()} damage, reaches ${t.range.round()} from your cave. '
-            'Build one on each ledge.',
+            'Build one on each spot.',
             textAlign: TextAlign.center,
             style: AppTheme.body(16, color: Pal.muted),
           ),
@@ -188,11 +188,11 @@ class _Turrets extends GetView<BattleController> {
           for (var i = 0; i < c.turrets.length; i++) ...[
             Row(
               children: [
-                const GameImage(UiImg.turret, size: 40),
+                GameImage(UiImg.turret(c.playerEra), size: 40),
                 SizedBox(width: 10.sp),
                 Expanded(
                   child: Text(
-                    'LEDGE ${i + 1}${c.turrets[i] ? '  ·  BUILT' : ''}',
+                    'SPOT ${i + 1}${c.turrets[i] ? '  ·  BUILT' : ''}',
                     style: AppTheme.display(18, color: c.turrets[i] ? Pal.leaf : Pal.cream),
                   ),
                 ),
@@ -221,8 +221,8 @@ class _Turrets extends GetView<BattleController> {
           SizedBox(height: 4.sp),
           GameButton(label: 'BACK TO BATTLE', onTap: c.closeOverlay, tone: GameTone.stone),
         ],
-      ),
-    );
+      );
+    });
   }
 }
 
@@ -283,9 +283,9 @@ class _UpgradeTile extends GetView<BattleController> {
     };
     final now = lvl == 0 ? 'No bonus yet' : 'Now $sign${pct * lvl}% $what';
     final portrait = switch (u.target) {
-      UpgradeTarget.melee => UiImg.unitCard('clubman'),
-      UpgradeTarget.ranged => UiImg.unitCard('slinger'),
-      UpgradeTarget.turret => UiImg.turret,
+      UpgradeTarget.melee => UiImg.unitCard(c.playerEra.byRole(UnitRole.melee)?.sprite ?? 'clubman'),
+      UpgradeTarget.ranged => UiImg.unitCard(c.playerEra.byRole(UnitRole.ranged)?.sprite ?? 'slinger'),
+      UpgradeTarget.turret => UiImg.turret(c.playerEra),
     };
     final badge = switch (u.stat) {
       UpgradeStat.damage => Icons.bolt_rounded,

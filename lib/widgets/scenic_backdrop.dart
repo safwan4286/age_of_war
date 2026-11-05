@@ -84,9 +84,9 @@ class _ScenicBackdropState extends State<ScenicBackdrop>
         fit: StackFit.expand,
         children: [
           // Same proportions as the battlefield's layers (units.json world).
-          _layer(Img.bgSky, 0.03, top: -0.05, height: 1.1),
-          _layer(Img.bgHills, 0.08, height: 1.0),
-          _layer(Img.bgNear, 0.16, top: 0.3, height: 0.74),
+          _layer(Img.bg('stone', 'sky'), 0.03, top: -0.05, height: 1.1),
+          _layer(Img.bg('stone', 'hills'), 0.08, height: 1.0),
+          _layer(Img.bg('stone', 'near'), 0.16, top: 0.3, height: 0.74),
           ColoredBox(color: Pal.ink.withValues(alpha: widget.scrim)),
           widget.child,
         ],
