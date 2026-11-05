@@ -53,6 +53,7 @@ class SimProjectile {
     required this.speed,
     this.slot = -1,
     this.sprite = 'stone',
+    this.shooter,
   }) : startX = x;
 
   final int id;
@@ -72,6 +73,9 @@ class SimProjectile {
 
   /// fx image name the view draws.
   final String sprite;
+
+  /// The unit type that shot it (null for turrets): where it appears.
+  final UnitDef? shooter;
   bool done = false;
 
   /// 0 → 1 along the flight, for the arc the view draws.
@@ -577,6 +581,7 @@ class BattleSim {
         damage: dmg,
         speed: u.def.projectileSpeed,
         sprite: u.def.projectile,
+        shooter: u.def,
       );
     } else if (target != null) {
       _damageUnit(target, dmg, by: u.side);
@@ -629,6 +634,7 @@ class BattleSim {
     required double speed,
     int slot = -1,
     String sprite = 'stone',
+    UnitDef? shooter,
   }) {
     final p = SimProjectile(
       id: _nextId++,
@@ -641,6 +647,7 @@ class BattleSim {
       speed: speed,
       slot: slot,
       sprite: sprite,
+      shooter: shooter,
     );
     projectiles.add(p);
     _events.add(SimEvent(SimEventType.projectile, side, unitId: p.id, x: fromX));

@@ -1,4 +1,5 @@
 import 'package:epoch_clash/models/game_data.dart';
+import 'package:epoch_clash/services/sim/battle_sim.dart';
 import 'package:epoch_clash/services/sim/swing.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -41,6 +42,21 @@ void main() {
     expect(s.frameAt(toHit: 0), 4);
     expect(s.frameAt(toHit: 0.9, sinceHit: 0.1), 4 + 0); // 0.6 s in
     expect(s.frameAt(toHit: 0.6, sinceHit: 0.4), 7);
+  });
+
+  test('the Archer lets go on her release frame, from her bow', () {
+    final data = loadData();
+    final archer = data.unit('archer');
+    expect(Swing(archer).frameAt(toHit: 0), 5);
+    expect(archer.muzzleUp, greaterThan(0));
+    final sim = BattleSim(data);
+    sim[Side.player].xp = data.era(0).evolveXp;
+    sim.evolve(Side.player);
+    place(sim, Side.player, 'archer', 500);
+    place(sim, Side.enemy, 'clubman', 650);
+    final shooters = <String?>{};
+    run(sim, 3, each: () => shooters.addAll(sim.projectiles.where((p) => p.side == Side.player).map((p) => p.shooter?.id)));
+    expect(shooters, {'archer'});
   });
 
   test('the Medieval Swordsman: full swing fits, same damage per second', () {

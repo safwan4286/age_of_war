@@ -1,0 +1,26 @@
+{
+  "_note": "SpriteCook walk + idle; attack and death stay the earlier Veo strips. The walk is drawn ~16% bigger than SpriteCook idle (510 px), hence scale 0.864.",
+  "sprite": "archer",
+  "era": "medieval",
+  "fitExisting": true,
+  "referenceHeight": 510,
+  "sheets": {
+    "walk": {
+      "file": "archer_walk.png",
+      "cols": 8,
+      "count": 8,
+      "anchor": "median",
+      "scale": 0.864
+    },
+    "idle": {
+      "file": "archer_idle.png",
+      "cols": 8,
+      "count": 8,
+      "anchor": "first"
+    }
+  },
+  "frameTimes": {
+    "walk": 0.0833,
+    "idle": 0.0667
+  }
+}

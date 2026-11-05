@@ -44,6 +44,8 @@ class UnitDef {
     this.frames = defaultFrames,
     this.frameTimes = const {},
     this.impactFrame = -1,
+    this.muzzleAhead = 0,
+    this.muzzleUp = 0,
   });
 
   final String id;
@@ -102,6 +104,11 @@ class UnitDef {
   /// The attack frame where the blow lands (-1 = half-way).
   final int impactFrame;
 
+  /// Where a ranged unit's shot appears, in world units from its feet:
+  /// ahead of it and up (the bow at full draw). 0 = the default height.
+  final double muzzleAhead;
+  final double muzzleUp;
+
   int frameCount(String anim) => frames[anim] ?? defaultFrames[anim] ?? 6;
 
   double frameTime(String anim, double fallback) => frameTimes[anim] ?? fallback;
@@ -141,6 +148,8 @@ class UnitDef {
         if (m.sub('frameTimes')[k] is num) k: m.sub('frameTimes').dbl(k),
     },
     impactFrame: m.integer('impactFrame', -1),
+    muzzleAhead: m['muzzle'] is List ? (m['muzzle'] as List)[0].toDouble() : 0,
+    muzzleUp: m['muzzle'] is List ? (m['muzzle'] as List)[1].toDouble() : 0,
   );
 }
 

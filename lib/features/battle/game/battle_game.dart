@@ -113,6 +113,13 @@ class BattleGame extends FlameGame {
     _applyCamera();
   }
 
+  /// Where a unit's shot appears (its bow), if the unit says.
+  Vector2? _muzzle(SimProjectile p) {
+    final d = p.shooter;
+    if (d == null || d.muzzleUp <= 0) return null;
+    return Vector2(p.startX + p.side.dir * d.muzzleAhead, Layout.groundY - d.muzzleUp);
+  }
+
   /// Loads era [i]'s art and builds its animations and effects.
   Future<void> _loadEra(int i) {
     if (i >= sim.data.eras.length) return Future.value();
@@ -361,11 +368,7 @@ class BattleGame extends FlameGame {
       final turret = p.kind == ProjectileKind.rock;
       final sprite = _fx[p.sprite];
       if (sprite == null) continue;
-      final view = ProjectileView(
-        p,
-        sprite,
-        launch: turret ? _bases[p.side]?.launchPos(p.slot) : null,
-      );
+      final view = ProjectileView(p, sprite, launch: turret ? _bases[p.side]?.launchPos(p.slot) : _muzzle(p));
       if (turret) _bases[p.side]?.fireTurret(p.slot);
       _shots[p.id] = view;
       world.add(view);

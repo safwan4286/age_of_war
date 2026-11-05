@@ -449,11 +449,17 @@
             "walk": 8
           },
           "frameTimes": {
-            "idle": 0.15,
-            "walk": 0.11
+            "idle": 0.0667,
+            "walk": 0.0833,
+            "attack": 0.0833
           },
           "drawScale": 0.4952,
-          "headY": 104
+          "headY": 104,
+          "muzzle": [
+            40,
+            78
+          ],
+          "impactFrame": 5
         },
         {
           "id": "knight",
