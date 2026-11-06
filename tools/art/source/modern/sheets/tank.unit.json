@@ -1,0 +1,39 @@
+{
+  "id": "tank",
+  "name": "Tank",
+  "role": "heavy",
+  "cost": 700,
+  "trainTime": 6.0,
+  "hp": 900,
+  "damage": 160,
+  "attackEvery": 2.6,
+  "range": 260,
+  "speed": 30,
+  "killReward": 910,
+  "xp": 560,
+  "projectile": "modern_shell",
+  "projectileSpeed": 800,
+  "muzzle": [
+    93,
+    60
+  ],
+  "sprite": "tank",
+  "era": "modern",
+  "frameW": 714,
+  "frameH": 314,
+  "frames": {
+    "walk": 8,
+    "idle": 8,
+    "attack": 18,
+    "die": 12
+  },
+  "frameTimes": {
+    "idle": 0.15,
+    "walk": 0.12,
+    "attack": 0.0667
+  },
+  "impactFrame": 3,
+  "drawScale": 0.52,
+  "headY": 104,
+  "width": 110
+}

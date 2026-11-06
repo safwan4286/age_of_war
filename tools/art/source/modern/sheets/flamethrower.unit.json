@@ -1,0 +1,33 @@
+{
+  "id": "flamethrower",
+  "name": "Flamethrower Trooper",
+  "role": "melee",
+  "cost": 250,
+  "trainTime": 2.6,
+  "hp": 560,
+  "damage": 100,
+  "attackEvery": 1.4,
+  "range": 60,
+  "speed": 34,
+  "killReward": 325,
+  "xp": 200,
+  "sprite": "flamethrower",
+  "era": "modern",
+  "frameW": 584,
+  "frameH": 217,
+  "frames": {
+    "walk": 8,
+    "idle": 8,
+    "attack": 18,
+    "die": 12
+  },
+  "frameTimes": {
+    "idle": 0.15,
+    "walk": 0.12,
+    "attack": 0.0667
+  },
+  "impactFrame": 6,
+  "drawScale": 0.6169,
+  "headY": 124,
+  "width": 46
+}

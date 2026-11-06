@@ -96,7 +96,26 @@ def frames_of(src: Path, s: dict, scale: float, use_pick=True):
     if use_pick and "pick" in s:
         allf = frames if "files" in s else cells(src / s["file"], s["cols"], s["count"], (), scale, s.get("holes"))
         frames = [allf[i] for i in s["pick"]]
+    if s.get("detint"):
+        frames = [detint(f) for f in frames]
     return frames
+
+
+def detint(frame: Image.Image) -> Image.Image:
+    """SpriteCook sometimes paints a green or purple oil-slick sheen on
+    dark parts (boots, hoses). Dark pixels leaning green or purple become
+    neutral dark grey at the same brightness ("detint": true on a sheet);
+    navy blue cloth is left alone."""
+    a = np.asarray(frame).copy()
+    r, g, b = (a[..., i].astype(int) for i in range(3))
+    dark = np.maximum(np.maximum(r, g), b) < 150
+    green = (g > r + 10) & (g > b + 4)
+    purple = (r > g + 14) & (b > g + 14)
+    m = dark & (green | purple) & (a[..., 3] > 0)
+    lum = (0.3 * r + 0.55 * g + 0.15 * b) * 0.9
+    for i, k in enumerate((0.96, 0.98, 1.06)):
+        a[..., i] = np.where(m, np.clip(lum * k, 0, 255), a[..., i])
+    return Image.fromarray(a, "RGBA")
 
 
 def drop_smears(frame: Image.Image) -> Image.Image:
@@ -176,6 +195,47 @@ def body(frame: Image.Image):
     band = a[top + int((feet - top) * 0.35):top + int((feet - top) * 0.65)]
     xs = np.nonzero(band)[1]
     return float(np.median(xs)), int(feet), int(feet - top)
+
+
+def mirror_text(spec, out, anims, cw, ch):
+    """The game mirrors enemy units, so lettering on them ("07" on the
+    tank) would read backwards. "mirrorText": {"box": [x0, y0, x1, y1]}
+    marks the lettering in the first idle frame, in pixels from the
+    cell's centre (x) and bottom (y), so it survives the cell resizing; in every
+    enemy frame the same patch is found by template matching and flipped
+    in place, so the game's mirror turns it back. Frames where the match
+    is weak (the turret tumbling in the death) are left as they are."""
+    import cv2
+    bx0, by0, bx1, by1 = spec["mirrorText"]["box"]
+    x0, x1, y0, y1 = cw // 2 + bx0, cw // 2 + bx1, ch + by0, ch + by1
+    idle = np.asarray(Image.open(out / f"{spec['era']}_{spec['sprite']}_idle_red.png"))
+    tpl = cv2.cvtColor(np.ascontiguousarray(idle[y0:y1, x0:x1, :3]), cv2.COLOR_RGB2GRAY)
+    th, tw = tpl.shape
+    pad = 40
+    for name in anims:
+        path = out / f"{spec['era']}_{spec['sprite']}_{name}_red.png"
+        a = np.asarray(Image.open(path)).copy()
+        per = a.shape[1] // cw
+        flipped = 0
+        # Video clips draw the lettering a little differently: find it in
+        # the clip's first frame with a looser match, then track that.
+        here, need = tpl, 0.35
+        for i in range(len(anims[name][0])):
+            ox, oy = (i % per) * cw, (i // per) * ch
+            sx0, sy0 = max(0, x0 - pad), max(0, y0 - pad)
+            sx1, sy1 = min(cw, x1 + pad), min(ch, y1 + pad)
+            win = cv2.cvtColor(np.ascontiguousarray(a[oy + sy0:oy + sy1, ox + sx0:ox + sx1, :3]), cv2.COLOR_RGB2GRAY)
+            res = cv2.matchTemplate(win, here, cv2.TM_CCOEFF_NORMED)
+            _, score, _, (mx, my) = cv2.minMaxLoc(res)
+            if score < need:
+                continue
+            fx, fy = ox + sx0 + mx, oy + sy0 + my
+            if i == 0:
+                here, need = win[my:my + th, mx:mx + tw].copy(), 0.6
+            a[fy:fy + th, fx:fx + tw] = a[fy:fy + th, fx:fx + tw][:, ::-1]
+            flipped += 1
+        Image.fromarray(a, "RGBA").save(path)
+        print(f"mirrorText {name}: flipped in {flipped}/{len(anims[name][0])} frames")
 
 
 def portraits(spec, src, root):
@@ -352,6 +412,8 @@ def main():
         red_sheet.save(out / f"{stem}_red.png")
         counts[name] = len(frames)
         print(f"{name}: {len(frames)} frames, {per_row}/row, sheet {sheet.size}")
+    if spec.get("mirrorText"):
+        mirror_text(spec, out, anims, cw, ch)
 
     data_path = root / "assets/data/units.json"
     data = json.loads(data_path.read_text())

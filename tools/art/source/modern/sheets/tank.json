@@ -1,0 +1,105 @@
+{
+  "_note": "Tank (Modern heavy, shoots). Walk + idle: SpriteCook from the flat side-view square master (tracks roll in the walk). Attack: 18 frames from Veo (one big shot on frame 3, the tank rocks back and settles; video frames 0,18,24,27,30,33,36,39,42,45,48,51,54,57,60,66,78,141; the drifting smoke cut off past the muzzle, the flash's rose glow keyed out). Death: 12 frames from Veo (blast, the turret jumps and lands crooked, flames and a smoke column over the wreck; video frames 0,12,15,18,21,24,30,36,42,51,63,78). Source frames: Veo ground shadow keyed, sparkle painted out. Purple-tinted thin smoke turned grey.",
+  "sprite": "tank",
+  "era": "modern",
+  "worldHeight": 104,
+  "width": 110,
+  "targetHeight": 200,
+  "sheets": {
+    "walk": {
+      "file": "tank_walk.png",
+      "cols": 8,
+      "count": 8,
+      "anchor": "median",
+      "scale": 1.0,
+      "detint": true
+    },
+    "idle": {
+      "file": "tank_idle.png",
+      "cols": 8,
+      "count": 8,
+      "anchor": "first",
+      "detint": true
+    },
+    "attack": {
+      "files": [
+        "tank_attack/a00.png",
+        "tank_attack/a01.png",
+        "tank_attack/a02.png",
+        "tank_attack/a03.png",
+        "tank_attack/a04.png",
+        "tank_attack/a05.png",
+        "tank_attack/a06.png",
+        "tank_attack/a07.png",
+        "tank_attack/a08.png",
+        "tank_attack/a09.png",
+        "tank_attack/a10.png",
+        "tank_attack/a11.png",
+        "tank_attack/a12.png",
+        "tank_attack/a13.png",
+        "tank_attack/a14.png",
+        "tank_attack/a15.png",
+        "tank_attack/a16.png",
+        "tank_attack/a17.png"
+      ],
+      "anchor": "first",
+      "scale": 0.552,
+      "smear": true
+    },
+    "die": {
+      "files": [
+        "tank_death/d00.png",
+        "tank_death/d01.png",
+        "tank_death/d02.png",
+        "tank_death/d03.png",
+        "tank_death/d04.png",
+        "tank_death/d05.png",
+        "tank_death/d06.png",
+        "tank_death/d07.png",
+        "tank_death/d08.png",
+        "tank_death/d09.png",
+        "tank_death/d10.png",
+        "tank_death/d11.png"
+      ],
+      "anchor": "first",
+      "scale": 0.552,
+      "smear": true
+    }
+  },
+  "frameTimes": {
+    "idle": 0.15,
+    "walk": 0.12,
+    "attack": 0.0667
+  },
+  "impactFrame": 3,
+  "stats": {
+    "id": "tank",
+    "name": "Tank",
+    "role": "heavy",
+    "cost": 700,
+    "trainTime": 6.0,
+    "hp": 900,
+    "damage": 160,
+    "attackEvery": 2.6,
+    "range": 260,
+    "speed": 30,
+    "killReward": 910,
+    "xp": 560,
+    "projectile": "modern_shell",
+    "projectileSpeed": 800,
+    "muzzle": [
+      93,
+      60
+    ]
+  },
+  "red": "clear",
+  "portraits": true,
+  "mirrorText": {
+    "box": [
+      -32,
+      -132,
+      -2,
+      -109
+    ]
+  }
+}

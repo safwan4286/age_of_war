@@ -1,0 +1,92 @@
+{
+  "_note": "Flamethrower Trooper (Modern melee). Walk + idle: SpriteCook from the square master (walk detinted: green/purple sheen on boots). Attack: 18 frames from Veo (brace, a straight jet of fire to the right from frame 6, fire stops, back to the pose; video frames 0,21,24,27,30,33,36,42,48,60,72,84,93,96,129,135,138,141; the smoke puff frames skipped). Death: 12 frames from Veo (hit, arms up, drops the gun, falls forward on his face; video frames 0,18,24,30,36,42,48,51,54,57,60,69; the gun-spark frames and the stand-up last frame skipped). Veo sparkle painted out.",
+  "sprite": "flamethrower",
+  "era": "modern",
+  "worldHeight": 124,
+  "width": 46,
+  "targetHeight": 200,
+  "sheets": {
+    "walk": {
+      "file": "flamethrower_walk.png",
+      "cols": 8,
+      "count": 8,
+      "anchor": "median",
+      "scale": 1.0,
+      "detint": true
+    },
+    "idle": {
+      "file": "flamethrower_idle.png",
+      "cols": 8,
+      "count": 8,
+      "anchor": "first"
+    },
+    "attack": {
+      "files": [
+        "flamethrower_attack/a00.png",
+        "flamethrower_attack/a01.png",
+        "flamethrower_attack/a02.png",
+        "flamethrower_attack/a03.png",
+        "flamethrower_attack/a04.png",
+        "flamethrower_attack/a05.png",
+        "flamethrower_attack/a06.png",
+        "flamethrower_attack/a07.png",
+        "flamethrower_attack/a08.png",
+        "flamethrower_attack/a09.png",
+        "flamethrower_attack/a10.png",
+        "flamethrower_attack/a11.png",
+        "flamethrower_attack/a12.png",
+        "flamethrower_attack/a13.png",
+        "flamethrower_attack/a14.png",
+        "flamethrower_attack/a15.png",
+        "flamethrower_attack/a16.png",
+        "flamethrower_attack/a17.png"
+      ],
+      "anchor": "first",
+      "scale": 0.58,
+      "smear": true
+    },
+    "die": {
+      "files": [
+        "flamethrower_death/d00.png",
+        "flamethrower_death/d01.png",
+        "flamethrower_death/d02.png",
+        "flamethrower_death/d03.png",
+        "flamethrower_death/d04.png",
+        "flamethrower_death/d05.png",
+        "flamethrower_death/d06.png",
+        "flamethrower_death/d07.png",
+        "flamethrower_death/d08.png",
+        "flamethrower_death/d09.png",
+        "flamethrower_death/d10.png",
+        "flamethrower_death/d11.png"
+      ],
+      "anchor": "first",
+      "scale": 0.58,
+      "smear": true,
+      "detint": true
+    }
+  },
+  "frameTimes": {
+    "idle": 0.15,
+    "walk": 0.12,
+    "attack": 0.0667
+  },
+  "impactFrame": 6,
+  "stats": {
+    "id": "flamethrower",
+    "name": "Flamethrower Trooper",
+    "role": "melee",
+    "cost": 250,
+    "trainTime": 2.6,
+    "hp": 560,
+    "damage": 100,
+    "attackEvery": 1.4,
+    "range": 60,
+    "speed": 34,
+    "killReward": 325,
+    "xp": 200
+  },
+  "red": "clear",
+  "portraits": true,
+  "_red": "cloth also reddened the steel tanks and hose; clear keeps them steel."
+}

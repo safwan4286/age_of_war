@@ -1,0 +1,39 @@
+{
+  "id": "machinegunner",
+  "name": "Machine Gunner",
+  "role": "ranged",
+  "cost": 330,
+  "trainTime": 3.2,
+  "hp": 300,
+  "damage": 72,
+  "attackEvery": 1.4,
+  "range": 250,
+  "speed": 32,
+  "killReward": 430,
+  "xp": 265,
+  "projectile": "modern_bullet",
+  "projectileSpeed": 900,
+  "muzzle": [
+    68,
+    57
+  ],
+  "sprite": "machinegunner",
+  "era": "modern",
+  "frameW": 496,
+  "frameH": 211,
+  "frames": {
+    "walk": 8,
+    "idle": 8,
+    "attack": 18,
+    "die": 12
+  },
+  "frameTimes": {
+    "idle": 0.15,
+    "walk": 0.12,
+    "attack": 0.0667
+  },
+  "impactFrame": 3,
+  "drawScale": 0.59,
+  "headY": 118,
+  "width": 50
+}

@@ -1,0 +1,97 @@
+{
+  "_note": "Machine Gunner (Modern ranged). Walk + idle: SpriteCook from the square master (walk detinted: purple edges on the belts). Attack: 18 frames from Veo (braces, a long burst with a flickering muzzle flash, stops; video frames 0,24,27,33,39,42,45,51,54,60,66,72,78,84,90,93,96,141; the smoke-wisp frames skipped, tracer streaks and shells dropped as specks). Death: 12 frames from Veo (drops to a knee, the gun falls, the backpack drags her onto her back; video frames 0,12,18,24,36,48,54,60,66,69,72,84; the frames where the gun fired skipped). Source frames: Veo ground shadow (darker magenta) keyed, tracers right of x=1270 cut.",
+  "sprite": "machinegunner",
+  "era": "modern",
+  "worldHeight": 118,
+  "width": 50,
+  "targetHeight": 200,
+  "sheets": {
+    "walk": {
+      "file": "machinegunner_walk.png",
+      "cols": 8,
+      "count": 8,
+      "anchor": "median",
+      "scale": 1.0,
+      "detint": true
+    },
+    "idle": {
+      "file": "machinegunner_idle.png",
+      "cols": 8,
+      "count": 8,
+      "anchor": "first"
+    },
+    "attack": {
+      "files": [
+        "machinegunner_attack/a00.png",
+        "machinegunner_attack/a01.png",
+        "machinegunner_attack/a02.png",
+        "machinegunner_attack/a03.png",
+        "machinegunner_attack/a04.png",
+        "machinegunner_attack/a05.png",
+        "machinegunner_attack/a06.png",
+        "machinegunner_attack/a07.png",
+        "machinegunner_attack/a08.png",
+        "machinegunner_attack/a09.png",
+        "machinegunner_attack/a10.png",
+        "machinegunner_attack/a11.png",
+        "machinegunner_attack/a12.png",
+        "machinegunner_attack/a13.png",
+        "machinegunner_attack/a14.png",
+        "machinegunner_attack/a15.png",
+        "machinegunner_attack/a16.png",
+        "machinegunner_attack/a17.png"
+      ],
+      "anchor": "first",
+      "scale": 0.576,
+      "smear": true
+    },
+    "die": {
+      "files": [
+        "machinegunner_death/d00.png",
+        "machinegunner_death/d01.png",
+        "machinegunner_death/d02.png",
+        "machinegunner_death/d03.png",
+        "machinegunner_death/d04.png",
+        "machinegunner_death/d05.png",
+        "machinegunner_death/d06.png",
+        "machinegunner_death/d07.png",
+        "machinegunner_death/d08.png",
+        "machinegunner_death/d09.png",
+        "machinegunner_death/d10.png",
+        "machinegunner_death/d11.png"
+      ],
+      "anchor": "first",
+      "scale": 0.576,
+      "smear": true,
+      "detint": true
+    }
+  },
+  "frameTimes": {
+    "idle": 0.15,
+    "walk": 0.12,
+    "attack": 0.0667
+  },
+  "impactFrame": 3,
+  "stats": {
+    "id": "machinegunner",
+    "name": "Machine Gunner",
+    "role": "ranged",
+    "cost": 330,
+    "trainTime": 3.2,
+    "hp": 300,
+    "damage": 72,
+    "attackEvery": 1.4,
+    "range": 250,
+    "speed": 32,
+    "killReward": 430,
+    "xp": 265,
+    "projectile": "modern_bullet",
+    "projectileSpeed": 900,
+    "muzzle": [
+      68,
+      57
+    ]
+  },
+  "red": "clear",
+  "portraits": true
+}
