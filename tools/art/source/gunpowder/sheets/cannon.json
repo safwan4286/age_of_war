@@ -1,0 +1,92 @@
+{
+  "_note": "Cannon Crew (Gunpowder heavy). Walk: SpriteCook custom 'gunner pushes cannon, wheels rolling' clip (the plain front walk left out the cannon). Idle: SpriteCook (magenta leftovers keyed). Attack: 17 Veo frames (lights the match, touches the fuse, covers his ears, FIRE with Veo's own flash on frame 9, pushes the cannon back). Death: 12 Veo frames (wheel smashed, cannon tips, gunner thrown on his back).",
+  "sprite": "cannon",
+  "era": "gunpowder",
+  "worldHeight": 96,
+  "width": 90,
+  "targetHeight": 200,
+  "red": "cloth",
+  "sheets": {
+    "walk": {
+      "file": "cannon_walk.png",
+      "cols": 8,
+      "count": 8,
+      "anchor": "median"
+    },
+    "idle": {
+      "file": "cannon_idle.png",
+      "cols": 8,
+      "count": 8,
+      "anchor": "first"
+    },
+    "attack": {
+      "files": [
+        "cannon_attack/a00.png",
+        "cannon_attack/a01.png",
+        "cannon_attack/a02.png",
+        "cannon_attack/a03.png",
+        "cannon_attack/a04.png",
+        "cannon_attack/a05.png",
+        "cannon_attack/a06.png",
+        "cannon_attack/a07.png",
+        "cannon_attack/a08.png",
+        "cannon_attack/a09.png",
+        "cannon_attack/a10.png",
+        "cannon_attack/a11.png",
+        "cannon_attack/a12.png",
+        "cannon_attack/a13.png",
+        "cannon_attack/a14.png",
+        "cannon_attack/a15.png",
+        "cannon_attack/a16.png"
+      ],
+      "anchor": "first",
+      "scale": 0.513,
+      "smear": true
+    },
+    "die": {
+      "files": [
+        "cannon_death/d00.png",
+        "cannon_death/d01.png",
+        "cannon_death/d02.png",
+        "cannon_death/d03.png",
+        "cannon_death/d04.png",
+        "cannon_death/d05.png",
+        "cannon_death/d06.png",
+        "cannon_death/d07.png",
+        "cannon_death/d08.png",
+        "cannon_death/d09.png",
+        "cannon_death/d10.png",
+        "cannon_death/d11.png"
+      ],
+      "anchor": "first",
+      "scale": 0.513,
+      "smear": true
+    }
+  },
+  "frameTimes": {
+    "idle": 0.15,
+    "walk": 0.12,
+    "attack": 0.0667
+  },
+  "impactFrame": 9,
+  "stats": {
+    "id": "cannon",
+    "name": "Cannon Crew",
+    "role": "heavy",
+    "cost": 480,
+    "trainTime": 5.0,
+    "hp": 480,
+    "damage": 110,
+    "attackEvery": 2.4,
+    "range": 240,
+    "speed": 26,
+    "killReward": 624,
+    "xp": 380,
+    "projectileSpeed": 700,
+    "projectile": "gunpowder_cannonball",
+    "muzzle": [
+      70,
+      61
+    ]
+  }
+}

@@ -119,11 +119,15 @@ class BaseView extends PositionComponent {
     if (slot >= 0 && slot < _turrets.length) _turrets[slot].fire();
   }
 
-  /// Where a shot leaves the turret on ledge [slot]: high on a catapult's
-  /// arm, at the front of a ballista's beam.
+  /// Where a shot leaves the turret on ledge [slot]: the muzzle the art
+  /// gives, else high on a catapult's arm or at the front of a ballista's
+  /// beam.
   Vector2 launchPos(int slot) {
     final p = slotPos(slot);
     final th = turretW * _turretSprite.srcSize.y / _turretSprite.srcSize.x;
+    if (art.turretMuzzle case (final ahead, final up)) {
+      return Vector2(p.x + side.dir * turretW * ahead, p.y - th * up);
+    }
     return th < turretW * 0.65
         ? Vector2(p.x + side.dir * turretW * 0.35, p.y - th * 0.58)
         : Vector2(p.x, p.y - turretW * 0.7);

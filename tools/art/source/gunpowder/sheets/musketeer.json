@@ -1,0 +1,94 @@
+{
+  "_note": "Veteran Musketeer (Gunpowder ranged). Walk + idle: SpriteCook (walk drawn ~11% bigger, idle musket barrel had magenta spill: despilled). Attack: 18 frames from the Veo clip (lift, aim, fire with Veo's own muzzle flash on frame 10, recoil, back to leaning; smoke puffs keyed out). Death: 12 Veo frames (pipe drops, musket falls, kneels, falls forward on his face).",
+  "sprite": "musketeer",
+  "era": "gunpowder",
+  "worldHeight": 124,
+  "width": 34,
+  "targetHeight": 200,
+  "sheets": {
+    "walk": {
+      "file": "musketeer_walk.png",
+      "cols": 8,
+      "count": 8,
+      "anchor": "median",
+      "scale": 0.89
+    },
+    "idle": {
+      "file": "musketeer_idle.png",
+      "cols": 8,
+      "count": 8,
+      "anchor": "first"
+    },
+    "attack": {
+      "files": [
+        "musketeer_attack/a00.png",
+        "musketeer_attack/a01.png",
+        "musketeer_attack/a02.png",
+        "musketeer_attack/a03.png",
+        "musketeer_attack/a04.png",
+        "musketeer_attack/a05.png",
+        "musketeer_attack/a06.png",
+        "musketeer_attack/a07.png",
+        "musketeer_attack/a08.png",
+        "musketeer_attack/a09.png",
+        "musketeer_attack/a10.png",
+        "musketeer_attack/a11.png",
+        "musketeer_attack/a12.png",
+        "musketeer_attack/a13.png",
+        "musketeer_attack/a14.png",
+        "musketeer_attack/a15.png",
+        "musketeer_attack/a16.png",
+        "musketeer_attack/a17.png"
+      ],
+      "anchor": "first",
+      "scale": 0.625,
+      "smear": true
+    },
+    "die": {
+      "files": [
+        "musketeer_death/d00.png",
+        "musketeer_death/d01.png",
+        "musketeer_death/d02.png",
+        "musketeer_death/d03.png",
+        "musketeer_death/d04.png",
+        "musketeer_death/d05.png",
+        "musketeer_death/d06.png",
+        "musketeer_death/d07.png",
+        "musketeer_death/d08.png",
+        "musketeer_death/d09.png",
+        "musketeer_death/d10.png",
+        "musketeer_death/d11.png"
+      ],
+      "anchor": "first",
+      "scale": 0.625,
+      "smear": true
+    }
+  },
+  "frameTimes": {
+    "idle": 0.15,
+    "walk": 0.12,
+    "attack": 0.0667
+  },
+  "impactFrame": 10,
+  "stats": {
+    "id": "musketeer",
+    "name": "Veteran Musketeer",
+    "role": "ranged",
+    "cost": 220,
+    "trainTime": 3.0,
+    "hp": 190,
+    "damage": 58,
+    "attackEvery": 1.8,
+    "range": 230,
+    "speed": 32,
+    "killReward": 286,
+    "xp": 170,
+    "projectileSpeed": 900,
+    "projectile": "gunpowder_ball",
+    "muzzle": [
+      100,
+      92
+    ]
+  },
+  "red": "cloth"
+}

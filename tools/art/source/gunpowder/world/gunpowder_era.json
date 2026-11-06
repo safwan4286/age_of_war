@@ -1,0 +1,49 @@
+{
+  "base": {
+    "art": {
+      "height": 380,
+      "gate": 0.813,
+      "slots": [
+        [
+          0.793,
+          0.612
+        ],
+        [
+          0.627,
+          0.467
+        ],
+        [
+          0.428,
+          0.307
+        ]
+      ],
+      "turretW": 0.192,
+      "ledgeW": 0.192,
+      "cliff": [
+        0.006,
+        0.222
+      ]
+    }
+  },
+  "world": {
+    "layers": {
+      "sky": {
+        "top": -140,
+        "height": 690
+      },
+      "hills": {
+        "top": 10,
+        "height": 460
+      },
+      "near": {
+        "top": 177,
+        "height": 420
+      }
+    }
+  },
+  "icons": {
+    "special": "icon_cannonbarrage",
+    "evolve": "icon_evolve_gunpowder",
+    "turret": "icon_fortcannon"
+  }
+}

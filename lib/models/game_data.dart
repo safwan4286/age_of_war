@@ -331,6 +331,7 @@ class BaseArt {
     this.slots = const [(0.86, 0.36), (0.55, 0.27), (0.28, 0.10)],
     this.turretW = 0,
     this.cliffFrom = 0,
+    this.turretMuzzle,
   });
 
   /// Drawn height in world units; width follows the picture.
@@ -350,6 +351,11 @@ class BaseArt {
   /// from this x (fraction of the picture) outward.
   final double cliffFrom;
 
+  /// Where a turret's shot leaves it: (ahead of its centre as a fraction
+  /// of its width, up from its feet as a fraction of its height). Null =
+  /// the layout's guess for a catapult or ballista.
+  final (double, double)? turretMuzzle;
+
   static BaseArt fromMap(Map<dynamic, dynamic> m) {
     final raw = m['slots'];
     final slots = <(double, double)>[
@@ -367,6 +373,10 @@ class BaseArt {
       cliffFrom: m['cliff'] is List && (m['cliff'] as List).isNotEmpty && (m['cliff'] as List).first is num
           ? ((m['cliff'] as List).first as num).toDouble()
           : 0,
+      turretMuzzle: switch (m['turretMuzzle']) {
+        [final num a, final num u] => (a.toDouble(), u.toDouble()),
+        _ => null,
+      },
     );
   }
 }

@@ -5,6 +5,8 @@ import 'package:get/get.dart';
 import '../../models/battle_result.dart';
 import '../../models/game_data.dart';
 import '../../resources/routes.dart';
+import '../../services/audio/audio_service.dart';
+import '../../services/audio/sound_cues.dart';
 import '../../services/game_data_service.dart';
 import '../../services/save_service.dart';
 import '../../services/sim/battle_sim.dart';
@@ -109,6 +111,21 @@ class BattleController extends GetxController {
     );
     game.speed = speed.value.toDouble();
     _refresh();
+    _battleMusic();
+  }
+
+  // ------------------------------------------------------------- sound
+
+  AudioService? get _audio => Get.isRegistered<AudioService>() ? AudioService.to : null;
+
+  void _sfx(Sfx s) => _audio?.play(s);
+
+  /// Each age has its own battle track.
+  void _battleMusic() => _audio?.music(Music.battle(playerEra.id));
+
+  void _denied() {
+    _buzz(HapticFeedback.vibrate);
+    _sfx(Sfx.denied);
   }
 
   // ------------------------------------------------------------- frame
@@ -166,11 +183,14 @@ class BattleController extends GetxController {
 
   void _onEvents(List<SimEvent> events) {
     for (final e in events) {
+      _audio?.playCues(cuesFor(e, sim));
       switch (e.type) {
         case SimEventType.meteorImpact:
           _buzz(HapticFeedback.lightImpact);
         case SimEventType.evolved when e.side == Side.enemy:
           _buzz(HapticFeedback.mediumImpact);
+        case SimEventType.evolved:
+          _battleMusic();
         case SimEventType.baseHit when e.side == Side.player:
           final now = sim.time.floor();
           if (now != _lastBaseBuzz) {
@@ -206,6 +226,7 @@ class BattleController extends GetxController {
       baseHpLeft: me.baseHp / sim.maxHp(Side.player),
     );
     final played = round.value;
+    _audio?.sting(result.victory ? Sfx.victory : Sfx.defeat, after: Music.menu);
     result = await save.record(result);
     // Let the last blow land on screen before leaving.
     await Future<void>.delayed(const Duration(milliseconds: 1400));
@@ -220,7 +241,12 @@ class BattleController extends GetxController {
   /// card's own shake).
   bool train(String id) {
     final ok = sim.queueUnit(Side.player, id);
-    _buzz(ok ? HapticFeedback.selectionClick : HapticFeedback.vibrate);
+    if (ok) {
+      _buzz(HapticFeedback.selectionClick);
+      _sfx(Sfx.train);
+    } else {
+      _denied();
+    }
     _refresh();
     return ok;
   }
@@ -248,13 +274,13 @@ class BattleController extends GetxController {
 
   void buyUpgrade(String id) {
     final ok = sim.buyUpgrade(Side.player, id);
-    _buzz(ok ? HapticFeedback.mediumImpact : HapticFeedback.vibrate);
+    ok ? _buzz(HapticFeedback.mediumImpact) : _denied();
     _refresh();
   }
 
   void buildTurret(int slot) {
     final ok = sim.buyTurret(Side.player, slot);
-    _buzz(ok ? HapticFeedback.mediumImpact : HapticFeedback.vibrate);
+    ok ? _buzz(HapticFeedback.mediumImpact) : _denied();
     _refresh();
   }
 
@@ -269,7 +295,7 @@ class BattleController extends GetxController {
     if (sim.castMeteor(Side.player)) {
       _buzz(HapticFeedback.mediumImpact);
     } else {
-      _buzz(HapticFeedback.vibrate);
+      _denied();
     }
     _refresh();
   }
@@ -282,7 +308,7 @@ class BattleController extends GetxController {
     } else if (sim.evolve(Side.player)) {
       _buzz(HapticFeedback.heavyImpact);
     } else {
-      _buzz(HapticFeedback.vibrate);
+      _denied();
     }
     _refresh();
   }

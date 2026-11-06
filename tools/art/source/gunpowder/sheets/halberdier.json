@@ -1,0 +1,96 @@
+{
+  "_note": "Giant Halberdier (Gunpowder melee). Walk + idle: SpriteCook. Attack: 16 frames from the Veo clip (starts and ends on his shoulder like the idle, sleeves match; pale smear arcs keyed out; frame 9 = the chop). The 5x5 sheet (halberdier_attack.png) is the older option. Death: 12 frames cut from the Veo clip (frames 7..73 every 6th; the clip then stands him back up, unused). Walk frame 2 had a hole cut through the trousers: filled.",
+  "sprite": "halberdier",
+  "era": "gunpowder",
+  "worldHeight": 130,
+  "width": 52,
+  "targetHeight": 200,
+  "sheets": {
+    "walk": {
+      "file": "halberdier_walk.png",
+      "cols": 8,
+      "count": 8,
+      "anchor": "median",
+      "scale": 0.904,
+      "holes": {
+        "2": [
+          [
+            485,
+            540,
+            285,
+            355
+          ]
+        ]
+      }
+    },
+    "idle": {
+      "file": "halberdier_idle.png",
+      "cols": 8,
+      "count": 8,
+      "anchor": "first"
+    },
+    "attack": {
+      "files": [
+        "halberdier_attack/a00.png",
+        "halberdier_attack/a01.png",
+        "halberdier_attack/a02.png",
+        "halberdier_attack/a03.png",
+        "halberdier_attack/a04.png",
+        "halberdier_attack/a05.png",
+        "halberdier_attack/a06.png",
+        "halberdier_attack/a07.png",
+        "halberdier_attack/a08.png",
+        "halberdier_attack/a09.png",
+        "halberdier_attack/a10.png",
+        "halberdier_attack/a11.png",
+        "halberdier_attack/a12.png",
+        "halberdier_attack/a13.png",
+        "halberdier_attack/a14.png",
+        "halberdier_attack/a15.png"
+      ],
+      "anchor": "first",
+      "scale": 0.624,
+      "smear": true
+    },
+    "die": {
+      "files": [
+        "halberdier_death/d00.png",
+        "halberdier_death/d01.png",
+        "halberdier_death/d02.png",
+        "halberdier_death/d03.png",
+        "halberdier_death/d04.png",
+        "halberdier_death/d05.png",
+        "halberdier_death/d06.png",
+        "halberdier_death/d07.png",
+        "halberdier_death/d08.png",
+        "halberdier_death/d09.png",
+        "halberdier_death/d10.png",
+        "halberdier_death/d11.png"
+      ],
+      "anchor": "first",
+      "scale": 0.624
+    }
+  },
+  "frameTimes": {
+    "idle": 0.15,
+    "walk": 0.12,
+    "attack": 0.0667
+  },
+  "impactFrame": 9,
+  "stats": {
+    "id": "halberdier",
+    "name": "Giant Halberdier",
+    "role": "melee",
+    "cost": 160,
+    "trainTime": 2.5,
+    "hp": 380,
+    "damage": 66,
+    "attackEvery": 1.4,
+    "range": 32,
+    "speed": 34,
+    "killReward": 208,
+    "xp": 130
+  },
+  "red": "cloth",
+  "_red": "His navy came out dark and greyish, so the enemy version also reddens dark cool cloth (red: cloth)."
+}

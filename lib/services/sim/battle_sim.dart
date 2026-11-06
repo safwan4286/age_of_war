@@ -461,6 +461,21 @@ class BattleSim {
   }
 
   /// Nearest living enemy ahead of [u] (units never pass each other).
+  /// Lookups for the view and sounds (events carry ids).
+  SimUnit? unitById(int id) {
+    for (final u in units) {
+      if (u.id == id) return u;
+    }
+    return null;
+  }
+
+  SimProjectile? projectileById(int id) {
+    for (final p in projectiles) {
+      if (p.id == id) return p;
+    }
+    return null;
+  }
+
   SimUnit? _targetFor(SimUnit u) {
     SimUnit? best;
     for (final e in aliveOf(u.side.other)) {

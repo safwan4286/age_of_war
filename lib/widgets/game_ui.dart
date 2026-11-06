@@ -1,9 +1,12 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 import '../resources/assets.dart';
 import '../resources/theme.dart';
+import '../services/audio/audio_service.dart';
+import '../services/audio/sound_cues.dart';
 import '../services/responsiveness/device_manager.dart';
 
 /// Shared game UI: stone panels, chunky cartoon buttons, bars, stars.
@@ -133,7 +136,12 @@ class _GameButtonState extends State<GameButton> {
         onTapDown: enabled ? (_) => _set(true) : null,
         onTapCancel: () => _set(false),
         onTapUp: (_) => _set(false),
-        onTap: widget.onTap,
+        onTap: enabled
+            ? () {
+                _tapSound();
+                widget.onTap!();
+              }
+            : null,
         child: SizedBox(
           width: widget.width?.sp,
           height: h,
@@ -401,4 +409,9 @@ class FitScreen extends StatelessWidget {
       },
     );
   }
+}
+
+/// Button click, if the audio service is running (it isn't in tests).
+void _tapSound() {
+  if (Get.isRegistered<AudioService>()) AudioService.to.play(Sfx.tap);
 }

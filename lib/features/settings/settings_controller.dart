@@ -11,6 +11,8 @@ class SettingsController extends GetxController {
   void setDamageNumbers(bool v) => save.setDamageNumbers(v);
   void setScreenShake(bool v) => save.setScreenShake(v);
   void setHaptics(bool v) => save.setHaptics(v);
+  void setSound(bool v) => save.setSound(v);
+  void setMusic(bool v) => save.setMusic(v);
 
   /// First tap arms the button, second tap wipes.
   Future<void> tapReset() async {
@@ -31,6 +33,6 @@ class SettingsController extends GetxController {
   void showLicences(BuildContext context) => showLicensePage(
     context: context,
     applicationName: 'Epoch Clash',
-    applicationVersion: '0.1.0 · Stone Age slice',
+    applicationVersion: '0.2.0 · Stone and Medieval ages',
   );
 }

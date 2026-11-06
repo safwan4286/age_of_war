@@ -38,6 +38,10 @@ class SettingsScreen extends GetView<SettingsController> {
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                       child: Column(
                         children: [
+                          Obx(() => _Toggle('Sound effects', s.sound.value, c.setSound)),
+                          const _Divider(),
+                          Obx(() => _Toggle('Music', s.music.value, c.setMusic)),
+                          const _Divider(),
                           Obx(() => _Toggle('Damage numbers', s.damageNumbers.value, c.setDamageNumbers)),
                           const _Divider(),
                           Obx(() => _Toggle('Screen shake', s.screenShake.value, c.setScreenShake)),

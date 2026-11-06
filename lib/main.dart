@@ -7,6 +7,7 @@ import 'package:hive_ce_flutter/hive_ce_flutter.dart';
 
 import 'resources/routes.dart';
 import 'resources/theme.dart';
+import 'services/audio/audio_service.dart';
 import 'services/game_data_service.dart';
 import 'services/responsiveness/device_manager.dart';
 import 'services/save_service.dart';
@@ -23,6 +24,7 @@ Future<void> main() async {
     () => GameDataService().init(),
     permanent: true,
   );
+  await Get.putAsync<AudioService>(() => AudioService().init(), permanent: true);
 
   runApp(const EpochClashApp());
 }

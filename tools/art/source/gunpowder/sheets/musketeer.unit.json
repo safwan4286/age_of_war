@@ -1,0 +1,39 @@
+{
+  "id": "musketeer",
+  "name": "Veteran Musketeer",
+  "role": "ranged",
+  "cost": 220,
+  "trainTime": 3.0,
+  "hp": 190,
+  "damage": 58,
+  "attackEvery": 1.8,
+  "range": 230,
+  "speed": 32,
+  "killReward": 286,
+  "xp": 170,
+  "projectileSpeed": 900,
+  "projectile": "gunpowder_ball",
+  "muzzle": [
+    100,
+    92
+  ],
+  "sprite": "musketeer",
+  "era": "gunpowder",
+  "frameW": 456,
+  "frameH": 209,
+  "frames": {
+    "walk": 8,
+    "idle": 8,
+    "attack": 18,
+    "die": 12
+  },
+  "frameTimes": {
+    "idle": 0.15,
+    "walk": 0.12,
+    "attack": 0.0667
+  },
+  "impactFrame": 10,
+  "drawScale": 0.62,
+  "headY": 124,
+  "width": 34
+}

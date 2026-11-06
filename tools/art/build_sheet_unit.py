@@ -19,6 +19,8 @@ Spec (tools/art/source/<era>/sheets/<unit>.json):
                                  # a 1-frame idle breathes and a 1-frame die
                                  # falls over in code
     "frameTimes": {"idle": 0.125, "walk": 0.125, "attack": 0.08},
+    "red": "cloth"               # enemy colours: "cloth" (also dark navy),
+                                 # "clear" (clear blue only), default = swap
     "impactFrame": 8             # attack frame where the blow lands
   }
 
@@ -36,7 +38,8 @@ already has art: frames are scaled to its current figure size
 ("referenceHeight" = the new tool's idle figure height in px) and drawn
 into its current cell, so its other strips stay as they are.
 
-Usage: python3 tools/art/build_sheet_unit.py <spec.json> <project_root>
+Usage: python3 tools/art/build_sheet_unit.py <spec.json> <project_root> [--portraits]
+       (--portraits: only the shop card, medallion and menu pose)
 """
 import json
 import math
@@ -48,12 +51,12 @@ from PIL import Image
 from scipy import ndimage
 
 sys.path.insert(0, str(Path(__file__).parent))
-from build_unit import red_variant  # noqa: E402
+from build_unit import card, full_pose, medallion, red_variant  # noqa: E402
 
 MAX_TEX = 4096
 
 
-def cells(path: Path, cols: int, count: int, drop=(), scale=1.0):
+def cells(path: Path, cols: int, count: int, drop=(), scale=1.0, holes=None):
     im = Image.open(path).convert("RGBA")
     c = im.width // cols
     rows = math.ceil(count / cols)
@@ -63,11 +66,80 @@ def cells(path: Path, cols: int, count: int, drop=(), scale=1.0):
         if i in drop:
             continue
         x, y = (i % cols) * c, (i // cols) * ch
-        f = despill(im.crop((x, y, x + c, y + ch)))
-        if abs(scale - 1) > 1e-3:
-            f = f.resize((round(c * scale), round(ch * scale)), Image.LANCZOS)
-        out.append(f)
+        f = im.crop((x, y, x + c, y + ch))
+        out.append(_finish(f, scale, (holes or {}).get(str(i))))
     return out
+
+
+def _finish(f: Image.Image, scale: float, holes=None, smear=False) -> Image.Image:
+    if smear:
+        f = drop_smears(f)
+    f = despill(f)
+    if holes:
+        f = fill_holes(f, holes)
+    if abs(scale - 1) > 1e-3:
+        f = f.resize((round(f.width * scale), round(f.height * scale)), Image.LANCZOS)
+    return f
+
+
+def frames_of(src: Path, s: dict, scale: float, use_pick=True):
+    """A sheet's frames: a grid ("file", "cols", "count") or loose images
+    ("files", e.g. frames cut from a video). "pick" chooses and orders
+    frames (0-based); "drop" skips some; "holes" repairs cut-out holes."""
+    if "files" in s:
+        frames = [_finish(Image.open(src / f).convert("RGBA"), scale, (s.get("holes") or {}).get(str(i)),
+                          s.get("smear", False))
+                  for i, f in enumerate(s["files"])]
+        frames = [f for i, f in enumerate(frames) if i not in set(s.get("drop", []))]
+    else:
+        frames = cells(src / s["file"], s["cols"], s["count"], set(s.get("drop", [])), scale, s.get("holes"))
+    if use_pick and "pick" in s:
+        allf = frames if "files" in s else cells(src / s["file"], s["cols"], s["count"], (), scale, s.get("holes"))
+        frames = [allf[i] for i in s["pick"]]
+    return frames
+
+
+def drop_smears(frame: Image.Image) -> Image.Image:
+    """Video motion smears and dust drawn as pale pink over the magenta
+    background (white blended into it) become transparent."""
+    a = np.asarray(frame).copy()
+    r, g, b = (a[..., i].astype(int) for i in range(3))
+    pale = (r > 190) & (b > 190) & (np.abs(r - b) < 45) & (r - g > 35)
+    a[..., 3] = np.where(pale, 0, a[..., 3])
+    return Image.fromarray(a, "RGBA")
+
+
+def fill_holes(frame: Image.Image, regions) -> Image.Image:
+    """Fills holes a tool cut through the figure (inside the given
+    [y0, y1, x0, x1] regions) with the colour of the nearest solid pixel."""
+    a = np.asarray(frame).copy()
+    solid = a[..., 3] > 40
+    closed = ndimage.binary_fill_holes(ndimage.binary_closing(solid, iterations=6))
+    hole = closed & ~solid
+    mask = np.zeros_like(hole)
+    for y0, y1, x0, x1 in regions:
+        mask[y0:y1, x0:x1] = True
+    hole &= mask
+    if hole.any():
+        _, (iy, ix) = ndimage.distance_transform_edt(~solid, return_indices=True)
+        a[hole, :3] = a[iy[hole], ix[hole], :3]
+        a[hole, 3] = 255
+    return Image.fromarray(a, "RGBA")
+
+
+def red_cloth(img: Image.Image, vmax=100) -> Image.Image:
+    """Enemy colours for art whose blue came out dark and greyish (navy
+    cloth): besides clearly blue paint, dark cool pixels (cloth, not the
+    lighter steel) turn red."""
+    a = np.asarray(img).astype(float).copy()
+    r, g, b = a[..., 0], a[..., 1], a[..., 2]
+    mx = np.maximum(np.maximum(r, g), b)
+    blue = ((b > r + 25) & (b > g + 10)) | ((b >= r + 8) & (mx < vmax))
+    lum = 0.3 * r + 0.59 * g + 0.11 * b
+    a[..., 0] = np.where(blue, np.minimum(255, lum * 1.9 + 22), r)
+    a[..., 1] = np.where(blue, lum * 0.42, g)
+    a[..., 2] = np.where(blue, lum * 0.40, b)
+    return Image.fromarray(a.clip(0, 255).astype(np.uint8), "RGBA")
 
 
 def despill(frame: Image.Image) -> Image.Image:
@@ -106,6 +178,25 @@ def body(frame: Image.Image):
     return float(np.median(xs)), int(feet), int(feet - top)
 
 
+def portraits(spec, src, root):
+    """Shop card, HUD medallion and menu pose from the first idle frame at
+    full resolution ("portraits": true in the spec)."""
+    first = frames_of(src, spec["sheets"]["idle"], 1.0)[0]
+    first = first.crop(first.getchannel("A").getbbox())
+    icons = root / "assets/images/icons"
+    sprite = spec["sprite"]
+    # The medallion comes from the card's head-and-shoulders crop: a long
+    # musket or a cannon would pull a whole-figure crop off the face.
+    medallion(card(first, size=512)).save(icons / f"icon_{sprite}.png")
+    card(first).save(icons / f"card_{sprite}.png")
+    full = full_pose(first)
+    full.save(icons / f"pose_{sprite}.png")
+    mode = spec.get("red")
+    red = red_cloth(full) if mode == "cloth" else red_cloth(full, vmax=0) if mode == "clear" else red_variant(full)
+    red.save(icons / f"pose_{sprite}_red.png")
+    print(f"portraits: icon_{sprite}, card_{sprite}, pose_{sprite}(_red)")
+
+
 def fit_existing(spec, src, root):
     data_path = root / "assets/data/units.json"
     data = json.loads(data_path.read_text())
@@ -116,7 +207,7 @@ def fit_existing(spec, src, root):
     ref = spec.get("referenceHeight")
     if ref is None:  # the new idle's own height
         s = spec["sheets"]["idle"]
-        ref = body(cells(src / s["file"], s["cols"], s["count"])[0])[2]
+        ref = body(frames_of(src, s, 1.0)[0])[2]
     k = figure / ref
     out = root / "assets/images/units"
     # Line the new frames up with the unit's current idle (torso and feet),
@@ -129,7 +220,7 @@ def fit_existing(spec, src, root):
     elif "alignTo" in spec:
         half, base = spec["alignTo"]
     for name, s in spec["sheets"].items():
-        frames = cells(src / s["file"], s["cols"], s["count"], set(s.get("drop", [])), k * s.get("scale", 1.0))
+        frames = frames_of(src, s, k * s.get("scale", 1.0))
         info = [body(f) for f in frames]
         ax = float(np.median([i[0] for i in info])) if s.get("anchor") == "median" else info[0][0]
         ay = int(np.median([i[1] for i in info]))
@@ -162,6 +253,9 @@ def main():
     if spec.get("fitExisting"):
         fit_existing(spec, src, root)
         return
+    if "--portraits" in sys.argv[3:]:
+        portraits(spec, src, root)
+        return
 
     # Optional: shrink everything so the idle figure is targetHeight px
     # tall (tools export 500+ px figures; ~200 is plenty in game). A sheet
@@ -169,7 +263,7 @@ def main():
     k = 1.0
     if "targetHeight" in spec and "idle" in spec["sheets"]:
         s = spec["sheets"]["idle"]
-        k = spec["targetHeight"] / body(cells(src / s["file"], s["cols"], s["count"])[0])[2]
+        k = spec["targetHeight"] / body(frames_of(src, s, 1.0)[0])[2]
 
     def scale_of(s):
         return k * s.get("scale", 1.0)
@@ -177,7 +271,7 @@ def main():
     # (frames, anchor x, anchor y, scale) per animation.
     anims = {}
     for name, s in spec["sheets"].items():
-        frames = cells(src / s["file"], s["cols"], s["count"], set(s.get("drop", [])), scale_of(s))
+        frames = frames_of(src, s, scale_of(s))
         info = [body(f) for f in frames]
         if s.get("anchor", "first") == "median":
             ax = float(np.median([i[0] for i in info]))
@@ -192,7 +286,7 @@ def main():
     # Indices count every frame of the sheet ("drop" doesn't apply).
     raw = {}
     for name, s in spec["sheets"].items():
-        frames = cells(src / s["file"], s["cols"], s["count"], scale=scale_of(s))
+        frames = frames_of(src, {**s, "drop": []}, scale_of(s), use_pick=False)
         a = anims[name]
         raw[name] = [(f, a[1], a[2]) for f in frames]
     for name, seq in spec.get("sequence", {}).items():
@@ -246,14 +340,28 @@ def main():
             sheet.alpha_composite(cell, ((i % per_row) * cw, (i // per_row) * ch))
         stem = f"{spec['era']}_{spec['sprite']}_{name}"
         sheet.save(out / f"{stem}.png")
-        red_variant(sheet).save(out / f"{stem}_red.png")
+        mode = spec.get("red")
+        if mode == "cloth":
+            red_sheet = red_cloth(sheet)
+        elif mode == "clear":
+            # Clear blue only, painted the same deep red as "cloth" (the
+            # plain swap turned some blues pink), dark hats/boots untouched.
+            red_sheet = red_cloth(sheet, vmax=0)
+        else:
+            red_sheet = red_variant(sheet)
+        red_sheet.save(out / f"{stem}_red.png")
         counts[name] = len(frames)
         print(f"{name}: {len(frames)} frames, {per_row}/row, sheet {sheet.size}")
 
     data_path = root / "assets/data/units.json"
     data = json.loads(data_path.read_text())
-    era = next(e for e in data["eras"] if e["id"] == spec["era"])
-    u = next(u for u in era["units"] if u["sprite"] == spec["sprite"])
+    era = next((e for e in data["eras"] if e["id"] == spec["era"]), None)
+    u = next((u for u in era["units"] if u["sprite"] == spec["sprite"]), None) if era else None
+    pending = u is None
+    if pending:
+        # The age isn't in the game yet: keep the unit's art data next to
+        # the spec until all four units are built.
+        u = dict(spec.get("stats", {}), sprite=spec["sprite"], era=spec["era"])
     u["frameW"], u["frameH"] = cw, ch
     u["frames"] = counts
     u["frameTimes"] = spec.get("frameTimes", u.get("frameTimes", {}))
@@ -262,7 +370,12 @@ def main():
     u["drawScale"] = round(spec["worldHeight"] / ref_h, 4)
     u["headY"] = spec["worldHeight"]
     u["width"] = spec.get("width", u.get("width"))
-    data_path.write_text(json.dumps(data, indent=2) + "\n")
+    if pending:
+        out = spec_path.with_name(spec_path.stem + ".unit.json")
+        out.write_text(json.dumps(u, indent=2) + "\n")
+        print(f"age '{spec['era']}' not in the game yet: unit data -> {out.name}")
+    else:
+        data_path.write_text(json.dumps(data, indent=2) + "\n")
     print(f"{spec['sprite']}: cell {cw}x{ch}, feet at {base}, drawScale {u['drawScale']}")
 
 

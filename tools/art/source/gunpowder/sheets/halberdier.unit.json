@@ -1,0 +1,33 @@
+{
+  "id": "halberdier",
+  "name": "Giant Halberdier",
+  "role": "melee",
+  "cost": 160,
+  "trainTime": 2.5,
+  "hp": 380,
+  "damage": 66,
+  "attackEvery": 1.4,
+  "range": 32,
+  "speed": 34,
+  "killReward": 208,
+  "xp": 130,
+  "sprite": "halberdier",
+  "era": "gunpowder",
+  "frameW": 430,
+  "frameH": 239,
+  "frames": {
+    "walk": 8,
+    "idle": 8,
+    "attack": 16,
+    "die": 12
+  },
+  "frameTimes": {
+    "idle": 0.15,
+    "walk": 0.12,
+    "attack": 0.0667
+  },
+  "impactFrame": 9,
+  "drawScale": 0.65,
+  "headY": 130,
+  "width": 52
+}

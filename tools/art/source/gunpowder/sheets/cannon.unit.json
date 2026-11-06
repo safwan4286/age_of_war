@@ -1,0 +1,39 @@
+{
+  "id": "cannon",
+  "name": "Cannon Crew",
+  "role": "heavy",
+  "cost": 480,
+  "trainTime": 5.0,
+  "hp": 480,
+  "damage": 110,
+  "attackEvery": 2.4,
+  "range": 240,
+  "speed": 26,
+  "killReward": 624,
+  "xp": 380,
+  "projectileSpeed": 700,
+  "projectile": "gunpowder_cannonball",
+  "muzzle": [
+    70,
+    61
+  ],
+  "sprite": "cannon",
+  "era": "gunpowder",
+  "frameW": 694,
+  "frameH": 255,
+  "frames": {
+    "walk": 8,
+    "idle": 8,
+    "attack": 17,
+    "die": 12
+  },
+  "frameTimes": {
+    "idle": 0.15,
+    "walk": 0.12,
+    "attack": 0.0667
+  },
+  "impactFrame": 9,
+  "drawScale": 0.48,
+  "headY": 96,
+  "width": 90
+}

@@ -13,6 +13,7 @@ import 'components/base_view.dart';
 import 'components/bg_layer.dart';
 import 'components/floating_text.dart';
 import 'components/meteor_view.dart';
+import 'components/muzzle_flash.dart';
 import 'components/projectile_view.dart';
 import 'components/unit_view.dart';
 import 'world_layout.dart';
@@ -375,8 +376,13 @@ class BattleGame extends FlameGame {
       final turret = p.kind == ProjectileKind.rock;
       final sprite = _fx[p.sprite];
       if (sprite == null) continue;
-      final view = ProjectileView(p, sprite, launch: turret ? _bases[p.side]?.launchPos(p.slot) : _muzzle(p));
+      final launch = turret ? _bases[p.side]?.launchPos(p.slot) : _muzzle(p);
+      final view = ProjectileView(p, sprite, launch: launch);
       if (turret) _bases[p.side]?.fireTurret(p.slot);
+      final gun = Img.firearms[p.sprite];
+      if (gun != null) {
+        world.add(MuzzleFlash(launch ?? Vector2(p.startX, Layout.slingY), dir: p.side.dir.toDouble(), power: gun));
+      }
       _shots[p.id] = view;
       world.add(view);
     }

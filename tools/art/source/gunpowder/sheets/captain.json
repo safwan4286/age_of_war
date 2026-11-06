@@ -1,0 +1,90 @@
+{
+  "_note": "Swashbuckler Captain (Gunpowder elite). Walk + idle: SpriteCook. Attack: 18 frames from Veo try 2 (sinks into a fencing stance, LUNGES with the rapier straight out on frame 8, holds, recovers to the idle pose; video frames 0,10,20,30,40,48,52,56,60,70,80,88,92,96,104,112,118,126). Death: 12 frames from Veo death try 1 (hit, hat flies off, rapier dropped, clutches her side, sinks and lies on her side; video frames 0,9,15,30,39,48,54,57,60,63,66,75; the hit-flash frames and the blurred hat-flip frame d02 are skipped). The Veo sparkle watermark is painted out.",
+  "sprite": "captain",
+  "era": "gunpowder",
+  "worldHeight": 128,
+  "width": 48,
+  "targetHeight": 200,
+  "sheets": {
+    "walk": {
+      "file": "captain_walk.png",
+      "cols": 8,
+      "count": 8,
+      "anchor": "median",
+      "scale": 0.93
+    },
+    "idle": {
+      "file": "captain_idle.png",
+      "cols": 8,
+      "count": 8,
+      "anchor": "first"
+    },
+    "attack": {
+      "files": [
+        "captain_attack/a00.png",
+        "captain_attack/a01.png",
+        "captain_attack/a02.png",
+        "captain_attack/a03.png",
+        "captain_attack/a04.png",
+        "captain_attack/a05.png",
+        "captain_attack/a06.png",
+        "captain_attack/a07.png",
+        "captain_attack/a08.png",
+        "captain_attack/a09.png",
+        "captain_attack/a10.png",
+        "captain_attack/a11.png",
+        "captain_attack/a12.png",
+        "captain_attack/a13.png",
+        "captain_attack/a14.png",
+        "captain_attack/a15.png",
+        "captain_attack/a16.png",
+        "captain_attack/a17.png"
+      ],
+      "anchor": "first",
+      "scale": 0.617,
+      "smear": true
+    },
+    "die": {
+      "files": [
+        "captain_death/d00.png",
+        "captain_death/d01.png",
+        "captain_death/d03.png",
+        "captain_death/d04.png",
+        "captain_death/d05.png",
+        "captain_death/d06.png",
+        "captain_death/d07.png",
+        "captain_death/d08.png",
+        "captain_death/d09.png",
+        "captain_death/d10.png",
+        "captain_death/d11.png"
+      ],
+      "anchor": "first",
+      "scale": 0.617,
+      "smear": true
+    }
+  },
+  "frameTimes": {
+    "idle": 0.15,
+    "walk": 0.12,
+    "attack": 0.0667
+  },
+  "impactFrame": 8,
+  "stats": {
+    "id": "captain",
+    "name": "Swashbuckler Captain",
+    "role": "elite",
+    "cost": 1100,
+    "trainTime": 7.0,
+    "hp": 1700,
+    "damage": 150,
+    "attackEvery": 1.4,
+    "range": 30,
+    "speed": 38,
+    "killReward": 1430,
+    "xp": 880,
+    "auraBonus": 0.14,
+    "auraRadius": 150
+  },
+  "red": "clear",
+  "_red": "Plain swap turned her coat pink; red: clear paints only clear blue, deep red."
+}

@@ -18,11 +18,22 @@ void main() {
     });
 
     test('every unit moves at one pace: idle loop 1.2 s, walk cycle 0.96 s (0.64 s mounted)', () {
+      // Riders trot faster; the Cannon Crew is heavy but pushes on foot.
+      const mounted = {'dinorider', 'knight'};
       for (final u in data.units) {
         final idle = u.frameCount('idle') * u.frameTime('idle', 0);
         final walk = u.frameCount('walk') * u.frameTime('walk', 0);
         expect(idle, closeTo(1.2, 0.01), reason: u.id);
-        expect(walk, closeTo(u.role == UnitRole.heavy ? 0.64 : 0.96, 0.01), reason: u.id);
+        expect(walk, closeTo(mounted.contains(u.id) ? 0.64 : 0.96, 0.01), reason: u.id);
+      }
+    });
+
+    test('attacks play at one pace: drawn sheets 12 fps, video clips 15 fps, inside the interval', () {
+      for (final u in data.units) {
+        final ft = u.frameTimes['attack'];
+        expect(ft, isNotNull, reason: u.id);
+        expect([0.0833, 0.0667].any((v) => (ft! - v).abs() < 1e-4), isTrue, reason: '${u.id}: $ft');
+        expect(u.frameCount('attack') * ft!, lessThanOrEqualTo(u.attackEvery), reason: u.id);
       }
     });
 
@@ -49,27 +60,53 @@ void main() {
     });
 
     test('each era has one unit per role; ranged and aura units match roles', () {
-      expect(data.eras.map((e) => e.id), ['stone', 'medieval']);
+      expect(data.eras.map((e) => e.id), ['stone', 'medieval', 'gunpowder']);
       for (final e in data.eras) {
         expect(e.units.map((u) => u.role), UnitRole.values, reason: e.id);
-        expect(e.units.where((u) => u.ranged).map((u) => u.role), [UnitRole.ranged], reason: e.id);
+        expect(e.byRole(UnitRole.ranged)!.ranged, isTrue, reason: e.id);
+        // Only the Gunpowder heavy (the Cannon Crew) also shoots.
+        expect(e.units.where((u) => u.ranged).map((u) => u.role),
+            e.id == 'gunpowder' ? [UnitRole.ranged, UnitRole.heavy] : [UnitRole.ranged], reason: e.id);
         expect(e.units.where((u) => u.auraBonus > 0).map((u) => u.role), [UnitRole.elite], reason: e.id);
         for (final u in e.units) {
           expect(u.era, e.id, reason: u.id);
         }
       }
       expect(data.era(1).units.map((u) => u.id), ['swordsman', 'archer', 'knight', 'king']);
+      expect(data.era(2).units.map((u) => u.id), ['halberdier', 'musketeer', 'cannon', 'captain']);
     });
 
     test('later eras are stronger: base, turret and every role', () {
-      final a = data.era(0), b = data.era(1);
-      expect(b.baseHp, greaterThan(a.baseHp));
-      expect(b.turret.damage, greaterThan(a.turret.damage));
-      for (final r in UnitRole.values) {
-        expect(b.byRole(r)!.hp, greaterThan(a.byRole(r)!.hp), reason: r.name);
+      for (var i = 1; i < data.eras.length; i++) {
+        final a = data.era(i - 1), b = data.era(i);
+        expect(b.baseHp, greaterThan(a.baseHp), reason: b.id);
+        expect(b.turret.damage / b.turret.attackEvery, greaterThan(a.turret.damage / a.turret.attackEvery),
+            reason: b.id);
+        for (final r in UnitRole.values) {
+          final (ua, ub) = (a.byRole(r)!, b.byRole(r)!);
+          // A role that starts shooting (the Cannon Crew) trades health for
+          // range; the equal-gold duel test checks it still wins.
+          if (ub.ranged && !ua.ranged) continue;
+          expect(ub.hp, greaterThan(ua.hp), reason: '${b.id} ${r.name}');
+        }
+        expect(a.evolveXp, greaterThan(i == 1 ? 0 : data.era(i - 2).evolveXp), reason: a.id);
       }
-      expect(a.evolveXp, greaterThan(0));
-      expect(b.evolveXp, 0, reason: 'last era');
+      expect(data.eras.last.evolveXp, 0, reason: 'last era');
+    });
+
+    test('Gunpowder: shots, muzzles and the fort cannon', () {
+      final g = data.era(2);
+      expect(g.byRole(UnitRole.ranged)!.projectile, 'gunpowder_ball');
+      expect(g.byRole(UnitRole.heavy)!.projectile, 'gunpowder_cannonball');
+      for (final u in g.units.where((u) => u.ranged)) {
+        expect(u.muzzleUp, greaterThan(0), reason: u.id);
+      }
+      expect(g.turret.projectile, 'gunpowder_cannonball');
+      expect(g.baseArt.turretMuzzle, isNotNull);
+      expect(g.baseArt.slots.length, g.turret.slots);
+      expect(data.era(1).baseArt.turretMuzzle, isNull, reason: 'the ballista keeps the layout guess');
+      expect(g.meteor.sprite, 'gunpowder_fireball');
+      expect(g.icons['special'], 'icon_cannonbarrage');
     });
 
     test('base art has one ledge per turret slot; population cap is 10', () {

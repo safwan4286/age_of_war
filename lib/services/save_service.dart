@@ -15,12 +15,16 @@ class SaveService extends GetxService {
   final damageNumbers = true.obs;
   final screenShake = true.obs;
   final haptics = true.obs;
+  final sound = true.obs;
+  final music = true.obs;
 
   Future<SaveService> init() async {
     _box = await Hive.openBox<dynamic>(boxName);
     damageNumbers.value = _bool('damageNumbers', true);
     screenShake.value = _bool('screenShake', true);
     haptics.value = _bool('haptics', true);
+    sound.value = _bool('sound', true);
+    music.value = _bool('music', true);
     return this;
   }
 
@@ -78,6 +82,16 @@ class SaveService extends GetxService {
   Future<void> setHaptics(bool v) async {
     haptics.value = v;
     await _box.put('haptics', v);
+  }
+
+  Future<void> setSound(bool v) async {
+    sound.value = v;
+    await _box.put('sound', v);
+  }
+
+  Future<void> setMusic(bool v) async {
+    music.value = v;
+    await _box.put('music', v);
   }
 
   /// Wipes stars, wins and the tutorial flag; keeps settings.

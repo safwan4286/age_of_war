@@ -48,8 +48,14 @@ class Img {
     'rock' => 22,
     'medieval_arrow' => 30,
     'medieval_bolt' => 44,
+    'gunpowder_ball' => 7,
+    'gunpowder_cannonball' => 16,
     _ => 20,
   };
+
+  /// Shots fired with gunpowder: a muzzle flash and smoke where they
+  /// leave, this big (1 = a musket).
+  static const firearms = {'gunpowder_ball': 1.0, 'gunpowder_cannonball': 2.2};
 
   /// Everything one era draws in battle.
   static List<String> era(EraDef e) => [

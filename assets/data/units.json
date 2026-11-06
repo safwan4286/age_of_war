@@ -214,7 +214,8 @@
           },
           "frameTimes": {
             "idle": 0.15,
-            "walk": 0.12
+            "walk": 0.12,
+            "attack": 0.0833
           },
           "headY": 110,
           "role": "melee"
@@ -245,7 +246,8 @@
           },
           "frameTimes": {
             "idle": 0.15,
-            "walk": 0.12
+            "walk": 0.12,
+            "attack": 0.0833
           },
           "headY": 101,
           "role": "ranged",
@@ -276,7 +278,8 @@
           },
           "frameTimes": {
             "idle": 0.15,
-            "walk": 0.08
+            "walk": 0.08,
+            "attack": 0.0833
           },
           "headY": 148,
           "role": "heavy"
@@ -308,7 +311,8 @@
           },
           "frameTimes": {
             "idle": 0.15,
-            "walk": 0.12
+            "walk": 0.12,
+            "attack": 0.0833
           },
           "headY": 118,
           "role": "elite"
@@ -318,6 +322,7 @@
     {
       "id": "medieval",
       "name": "Medieval Age",
+      "evolveXp": 12000,
       "baseHp": 1500,
       "base": {
         "art": {
@@ -488,7 +493,8 @@
           },
           "frameTimes": {
             "idle": 0.15,
-            "walk": 0.08
+            "walk": 0.08,
+            "attack": 0.0833
           },
           "drawScale": 0.75,
           "headY": 150
@@ -520,10 +526,241 @@
           },
           "frameTimes": {
             "idle": 0.15,
-            "walk": 0.12
+            "walk": 0.12,
+            "attack": 0.0833
           },
           "drawScale": 0.581,
           "headY": 122
+        }
+      ]
+    },
+    {
+      "id": "gunpowder",
+      "name": "Gunpowder Age",
+      "baseHp": 2200,
+      "base": {
+        "art": {
+          "height": 380,
+          "gate": 0.813,
+          "slots": [
+            [
+              0.793,
+              0.612
+            ],
+            [
+              0.627,
+              0.467
+            ],
+            [
+              0.428,
+              0.307
+            ]
+          ],
+          "turretW": 0.192,
+          "ledgeW": 0.192,
+          "cliff": [
+            0.006,
+            0.222
+          ],
+          "turretMuzzle": [
+            0.397,
+            0.737
+          ]
+        }
+      },
+      "world": {
+        "layers": {
+          "sky": {
+            "top": -140,
+            "height": 690
+          },
+          "hills": {
+            "top": 10,
+            "height": 460
+          },
+          "near": {
+            "top": 177,
+            "height": 420
+          }
+        }
+      },
+      "turret": {
+        "id": "fort_cannon",
+        "name": "Fort Cannon",
+        "cost": 450,
+        "damage": 52,
+        "attackEvery": 2.2,
+        "range": 380,
+        "sellBack": 225,
+        "projectileSpeed": 700,
+        "slots": 3,
+        "projectile": "gunpowder_cannonball"
+      },
+      "special": {
+        "name": "Cannon Barrage",
+        "sprite": "gunpowder_fireball",
+        "blast": "gunpowder_blast",
+        "cooldown": 60,
+        "count": 12,
+        "duration": 1.8,
+        "damage": 140,
+        "radius": 60,
+        "size": 64,
+        "blastSize": 120,
+        "style": "meteor",
+        "fallTime": 0.55
+      },
+      "icons": {
+        "special": "icon_cannonbarrage",
+        "evolve": "icon_evolve_gunpowder",
+        "turret": "icon_fortcannon"
+      },
+      "units": [
+        {
+          "id": "halberdier",
+          "name": "Giant Halberdier",
+          "role": "melee",
+          "cost": 160,
+          "trainTime": 2.5,
+          "hp": 380,
+          "damage": 66,
+          "attackEvery": 1.4,
+          "range": 32,
+          "speed": 34,
+          "killReward": 208,
+          "xp": 130,
+          "sprite": "halberdier",
+          "era": "gunpowder",
+          "frameW": 430,
+          "frameH": 239,
+          "frames": {
+            "walk": 8,
+            "idle": 8,
+            "attack": 16,
+            "die": 12
+          },
+          "frameTimes": {
+            "idle": 0.15,
+            "walk": 0.12,
+            "attack": 0.0667
+          },
+          "impactFrame": 9,
+          "drawScale": 0.65,
+          "headY": 130,
+          "width": 52
+        },
+        {
+          "id": "musketeer",
+          "name": "Veteran Musketeer",
+          "role": "ranged",
+          "cost": 220,
+          "trainTime": 3.0,
+          "hp": 190,
+          "damage": 58,
+          "attackEvery": 1.8,
+          "range": 230,
+          "speed": 32,
+          "killReward": 286,
+          "xp": 170,
+          "projectileSpeed": 900,
+          "projectile": "gunpowder_ball",
+          "muzzle": [
+            100,
+            92
+          ],
+          "sprite": "musketeer",
+          "era": "gunpowder",
+          "frameW": 456,
+          "frameH": 209,
+          "frames": {
+            "walk": 8,
+            "idle": 8,
+            "attack": 18,
+            "die": 12
+          },
+          "frameTimes": {
+            "idle": 0.15,
+            "walk": 0.12,
+            "attack": 0.0667
+          },
+          "impactFrame": 10,
+          "drawScale": 0.62,
+          "headY": 124,
+          "width": 34
+        },
+        {
+          "id": "cannon",
+          "name": "Cannon Crew",
+          "role": "heavy",
+          "cost": 480,
+          "trainTime": 5.0,
+          "hp": 480,
+          "damage": 110,
+          "attackEvery": 2.4,
+          "range": 240,
+          "speed": 26,
+          "killReward": 624,
+          "xp": 380,
+          "projectileSpeed": 700,
+          "projectile": "gunpowder_cannonball",
+          "muzzle": [
+            70,
+            61
+          ],
+          "sprite": "cannon",
+          "era": "gunpowder",
+          "frameW": 694,
+          "frameH": 255,
+          "frames": {
+            "walk": 8,
+            "idle": 8,
+            "attack": 17,
+            "die": 12
+          },
+          "frameTimes": {
+            "idle": 0.15,
+            "walk": 0.12,
+            "attack": 0.0667
+          },
+          "impactFrame": 9,
+          "drawScale": 0.48,
+          "headY": 96,
+          "width": 90
+        },
+        {
+          "id": "captain",
+          "name": "Swashbuckler Captain",
+          "role": "elite",
+          "cost": 1100,
+          "trainTime": 7.0,
+          "hp": 1700,
+          "damage": 150,
+          "attackEvery": 1.4,
+          "range": 30,
+          "speed": 38,
+          "killReward": 1430,
+          "xp": 880,
+          "auraBonus": 0.14,
+          "auraRadius": 150,
+          "sprite": "captain",
+          "era": "gunpowder",
+          "frameW": 454,
+          "frameH": 231,
+          "frames": {
+            "walk": 8,
+            "idle": 8,
+            "attack": 18,
+            "die": 11
+          },
+          "frameTimes": {
+            "idle": 0.15,
+            "walk": 0.12,
+            "attack": 0.0667
+          },
+          "impactFrame": 8,
+          "drawScale": 0.64,
+          "headY": 128,
+          "width": 48
         }
       ]
     }

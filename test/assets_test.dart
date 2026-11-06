@@ -48,6 +48,11 @@ void main() {
     expect(Img.base('medieval'), 'bases/medieval_base.png');
     expect(Img.era(data.era(1)), contains('fx/medieval_bolt.png'));
     expect(Img.era(data.era(1)), contains('fx/medieval_blast.png'));
+    expect(Img.era(data.era(2)), containsAll(['fx/gunpowder_ball.png', 'fx/gunpowder_cannonball.png',
+        'fx/gunpowder_fireball.png', 'fx/gunpowder_blast.png', 'bases/gunpowder_turret_fire_red.png']));
+    // Every gunpowder shot gets a muzzle flash; a musket ball is tiny.
+    expect(Img.firearms.keys, containsAll(['gunpowder_ball', 'gunpowder_cannonball']));
+    expect(Img.fxWidth('gunpowder_ball'), lessThan(Img.fxWidth('gunpowder_cannonball')));
   });
 }
 

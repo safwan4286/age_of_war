@@ -1,0 +1,35 @@
+{
+  "id": "captain",
+  "name": "Swashbuckler Captain",
+  "role": "elite",
+  "cost": 1100,
+  "trainTime": 7.0,
+  "hp": 1700,
+  "damage": 150,
+  "attackEvery": 1.4,
+  "range": 30,
+  "speed": 38,
+  "killReward": 1430,
+  "xp": 880,
+  "auraBonus": 0.14,
+  "auraRadius": 150,
+  "sprite": "captain",
+  "era": "gunpowder",
+  "frameW": 454,
+  "frameH": 231,
+  "frames": {
+    "walk": 8,
+    "idle": 8,
+    "attack": 18,
+    "die": 11
+  },
+  "frameTimes": {
+    "idle": 0.15,
+    "walk": 0.12,
+    "attack": 0.0667
+  },
+  "impactFrame": 8,
+  "drawScale": 0.64,
+  "headY": 128,
+  "width": 48
+}

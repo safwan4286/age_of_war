@@ -18,7 +18,8 @@ void main() {
     expect(sim.evolve(Side.player), isTrue);
     expect(p.era, 1);
     expect(sim.eraOf(Side.player).id, 'medieval');
-    p.xp = 999999;
+    // XP is a running total: the next age needs more of it.
+    p.xp = data.era(1).evolveXp - 1;
     expect(sim.canEvolve, isFalse);
     expect(sim.evolve(Side.player), isFalse);
   });
@@ -77,6 +78,69 @@ void main() {
     final sprites = <String>{};
     run(sim, 2, each: () => sprites.addAll(sim.projectiles.map((p) => p.sprite)));
     expect(sprites, contains('medieval_arrow'));
+  });
+
+  test('Medieval evolves into the Gunpowder Age, the last one', () {
+    final sim = fresh();
+    final p = sim[Side.player];
+    p.xp = data.era(0).evolveXp;
+    expect(sim.evolve(Side.player), isTrue);
+    p.xp = data.era(1).evolveXp;
+    expect(sim.evolve(Side.player), isTrue);
+    expect(sim.eraOf(Side.player).id, 'gunpowder');
+    expect(sim.maxHp(Side.player), data.era(2).baseHp);
+    p.xp = 1 << 30;
+    expect(sim.evolve(Side.player), isFalse, reason: 'no age after Gunpowder yet');
+  });
+
+  test('Gunpowder shots: musket balls, cannonballs from the crew and the fort', () {
+    final sim = fresh();
+    for (final i in [0, 1]) {
+      sim[Side.player].xp = data.era(i).evolveXp;
+      sim.evolve(Side.player);
+    }
+    sim[Side.player].gold = 100000;
+    sim.buyTurret(Side.player, 0);
+    place(sim, Side.player, 'musketeer', 500);
+    place(sim, Side.player, 'cannon', 470);
+    place(sim, Side.enemy, 'clubman', 700);
+    place(sim, Side.enemy, 'clubman', 720);
+    final sprites = <String>{};
+    run(sim, 6, each: () => sprites.addAll(sim.projectiles.where((p) => p.side == Side.player).map((p) => p.sprite)));
+    expect(sprites, containsAll(['gunpowder_ball', 'gunpowder_cannonball']));
+  });
+
+  test('each age beats the one before, role for role, at equal gold', () {
+    for (var e = 1; e < data.eras.length; e++) {
+      for (final r in UnitRole.values) {
+        var edge = 0.0;
+        // Both ways round, so which side starts where doesn't matter.
+        for (final newSide in Side.values) {
+          final oldSide = newSide == Side.player ? Side.enemy : Side.player;
+          final sim = fresh();
+          for (var i = 0; i < e; i++) {
+            sim[newSide].xp = data.era(i).evolveXp;
+            sim.evolve(newSide);
+            if (i < e - 1) {
+              sim[oldSide].xp = data.era(i).evolveXp;
+              sim.evolve(oldSide);
+            }
+          }
+          final a = data.era(e).byRole(r)!, b = data.era(e - 1).byRole(r)!;
+          final budget = a.cost * 4.0;
+          double x(Side s, int i) => s == Side.player ? 800 - i * 22.0 : 1000 + i * 22.0;
+          final mine = [for (var i = 0; i < budget ~/ a.cost; i++) place(sim, newSide, a.id, x(newSide, i))];
+          final theirs = [for (var i = 0; i < budget ~/ b.cost; i++) place(sim, oldSide, b.id, x(oldSide, i))];
+          double value(List<SimUnit> us) =>
+              us.where((u) => u.alive).fold(0.0, (v, u) => v + u.def.cost * u.hp / u.def.hp);
+          for (var t = 0; t < 4000 && value(mine) > 0 && value(theirs) > 0; t++) {
+            sim.step(0.05);
+          }
+          edge += (value(mine) - value(theirs)) / budget / 2;
+        }
+        expect(edge, greaterThan(0.25), reason: '${data.era(e).id} ${r.name}');
+      }
+    }
   });
 
   test('the AI evolves and then trains the new roster by role', () {

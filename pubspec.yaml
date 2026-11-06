@@ -1,5 +1,5 @@
 name: epoch_clash
-description: Epoch Clash — a 2D lane battle through the ages. Stone Age vertical slice.
+description: Epoch Clash — a 2D lane battle through the ages.
 publish_to: none
 version: 0.1.0+1
 
@@ -13,6 +13,7 @@ dependencies:
   flutter:
     sdk: flutter
   flame: ^1.38.2
+  flame_audio: ^2.12.2
   get: ^4.7.3
   hive_ce: ^2.16.0
   hive_ce_flutter: ^2.3.4
@@ -34,6 +35,8 @@ flutter:
     - assets/images/fx/
     - assets/images/ui/
     - assets/fonts/
+    - assets/audio/sfx/
+    - assets/audio/music/
 
   fonts:
     # Both SIL Open Font License 1.1 (assets/fonts/OFL-*.txt).
