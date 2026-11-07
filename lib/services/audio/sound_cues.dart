@@ -15,6 +15,12 @@ enum Sfx {
   ballista(0.75, 0.1),
   musket(0.6, 0.07),
   cannon(0.8, 0.12),
+  machineGun(0.55, 0.06),
+  tankGun(0.85, 0.12),
+  rocket(0.75, 0.1),
+  flame(0.6, 0.1),
+  minigun(0.65, 0.08),
+  jet(0.85, 0.5),
   hit(0.45, 0.045),
   death(0.6, 0.08),
   coin(0.35, 0.07),
@@ -72,6 +78,13 @@ List<SoundCue> cuesFor(SimEvent e, BattleSim sim) {
     case SimEventType.attack:
       final u = sim.unitById(e.unitId);
       if (u == null || u.def.ranged) return const [];
+      // Close-range guns: the Modern melee and elite don't swing.
+      final own = switch (u.def.sprite) {
+        'flamethrower' => Sfx.flame,
+        'juggernaut' => Sfx.minigun,
+        _ => null,
+      };
+      if (own != null) return [SoundCue(own, v)];
       final heavy = u.def.role == UnitRole.heavy || u.def.role == UnitRole.elite;
       return [SoundCue(heavy ? Sfx.swingHeavy : Sfx.swingLight, v)];
     case SimEventType.projectile:
@@ -83,6 +96,9 @@ List<SoundCue> cuesFor(SimEvent e, BattleSim sim) {
         'medieval_arrow' => Sfx.bow,
         'gunpowder_ball' => Sfx.musket,
         'gunpowder_cannonball' => Sfx.cannon,
+        'modern_bullet' => Sfx.machineGun,
+        'modern_shell' => Sfx.tankGun,
+        'modern_rocket' => Sfx.rocket,
         _ => Sfx.throwStone,
       };
       return [SoundCue(sfx, v)];
@@ -94,8 +110,9 @@ List<SoundCue> cuesFor(SimEvent e, BattleSim sim) {
     case SimEventType.baseHit:
       return [SoundCue(Sfx.baseHit, mine ? 1.0 : 0.6)];
     case SimEventType.meteorCast:
-      final arrows = sim.eraOf(e.side).meteor.style == 'arrows';
-      return [SoundCue(arrows ? Sfx.volleyCast : Sfx.meteorCast, v)];
+      final m = sim.eraOf(e.side).meteor;
+      if (m.sprite == 'modern_bomb') return [SoundCue(Sfx.jet, v)];
+      return [SoundCue(m.style == 'arrows' ? Sfx.volleyCast : Sfx.meteorCast, v)];
     case SimEventType.meteorImpact:
       final arrows = e.meteor?.style == 'arrows';
       return [SoundCue(arrows ? Sfx.arrowImpact : Sfx.meteorImpact)];

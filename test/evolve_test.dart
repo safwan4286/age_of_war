@@ -80,17 +80,36 @@ void main() {
     expect(sprites, contains('medieval_arrow'));
   });
 
-  test('Medieval evolves into the Gunpowder Age, the last one', () {
+  test('the ages run Stone, Medieval, Gunpowder, Modern; Modern is the last for now', () {
     final sim = fresh();
     final p = sim[Side.player];
-    p.xp = data.era(0).evolveXp;
-    expect(sim.evolve(Side.player), isTrue);
-    p.xp = data.era(1).evolveXp;
-    expect(sim.evolve(Side.player), isTrue);
-    expect(sim.eraOf(Side.player).id, 'gunpowder');
-    expect(sim.maxHp(Side.player), data.era(2).baseHp);
+    for (final (i, id) in [(0, 'medieval'), (1, 'gunpowder'), (2, 'modern')]) {
+      p.xp = data.era(i).evolveXp;
+      expect(sim.evolve(Side.player), isTrue, reason: id);
+      expect(sim.eraOf(Side.player).id, id);
+      expect(sim.maxHp(Side.player), data.era(i + 1).baseHp);
+    }
     p.xp = 1 << 30;
-    expect(sim.evolve(Side.player), isFalse, reason: 'no age after Gunpowder yet');
+    expect(sim.evolve(Side.player), isFalse, reason: 'no age after Modern yet');
+  });
+
+  test('Modern shots: bullets, tank shells and rockets from the pod', () {
+    final sim = fresh();
+    for (final i in [0, 1, 2]) {
+      sim[Side.player].xp = data.era(i).evolveXp;
+      sim.evolve(Side.player);
+    }
+    sim[Side.player].gold = 100000;
+    sim.buyTurret(Side.player, 0);
+    place(sim, Side.player, 'machinegunner', 500);
+    place(sim, Side.player, 'tank', 440);
+    place(sim, Side.enemy, 'clubman', 720);
+    place(sim, Side.enemy, 'clubman', 740);
+    // One that slipped through, in the rocket pod's reach.
+    place(sim, Side.enemy, 'chief', 380);
+    final sprites = <String>{};
+    run(sim, 6, each: () => sprites.addAll(sim.projectiles.where((p) => p.side == Side.player).map((p) => p.sprite)));
+    expect(sprites, containsAll(['modern_bullet', 'modern_shell', 'modern_rocket']));
   });
 
   test('Gunpowder shots: musket balls, cannonballs from the crew and the fort', () {

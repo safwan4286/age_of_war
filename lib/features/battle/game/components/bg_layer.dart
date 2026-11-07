@@ -11,7 +11,8 @@ import '../world_layout.dart';
 ///
 /// The picture is drawn [layerH] tall at its own aspect and repeated to cover
 /// whatever the camera sees, every other copy mirrored so the joins are
-/// seamless. Wide phones and overscroll never show an edge.
+/// seamless ([mirror] false: plain repeats, for pictures drawn to tile).
+/// Wide phones and overscroll never show an edge.
 ///
 /// [swap] cross-fades to another era's picture.
 class BgLayer extends PositionComponent {
@@ -21,7 +22,8 @@ class BgLayer extends PositionComponent {
     required int priority,
     double layerTop = 0,
     double layerH = Layout.worldH,
-  }) : _now = _Pic(sprite, layerTop, layerH),
+    bool mirror = true,
+  }) : _now = _Pic(sprite, layerTop, layerH, mirror),
        super(priority: priority);
 
   final double factor;
@@ -43,9 +45,9 @@ class BgLayer extends PositionComponent {
     _viewW = viewW;
   }
 
-  void swap(Sprite sprite, {required double layerTop, required double layerH}) {
+  void swap(Sprite sprite, {required double layerTop, required double layerH, bool mirror = true}) {
     _old = _now;
-    _now = _Pic(sprite, layerTop, layerH);
+    _now = _Pic(sprite, layerTop, layerH, mirror);
     _fade = 0;
   }
 
@@ -73,7 +75,7 @@ class BgLayer extends PositionComponent {
     final first = ((_camLeft - origin) / tw).floor();
     for (var k = first; origin + k * tw < _camLeft + _viewW; k++) {
       final x = origin + k * tw;
-      if (k.isEven) {
+      if (k.isEven || !p.mirror) {
         p.sprite.render(canvas, position: Vector2(x, p.top), size: size, overridePaint: paint);
       } else {
         canvas
@@ -88,9 +90,10 @@ class BgLayer extends PositionComponent {
 }
 
 class _Pic {
-  const _Pic(this.sprite, this.top, this.h);
+  const _Pic(this.sprite, this.top, this.h, this.mirror);
 
   final Sprite sprite;
   final double top;
   final double h;
+  final bool mirror;
 }

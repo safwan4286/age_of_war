@@ -60,13 +60,14 @@ void main() {
     });
 
     test('each era has one unit per role; ranged and aura units match roles', () {
-      expect(data.eras.map((e) => e.id), ['stone', 'medieval', 'gunpowder']);
+      expect(data.eras.map((e) => e.id), ['stone', 'medieval', 'gunpowder', 'modern']);
       for (final e in data.eras) {
         expect(e.units.map((u) => u.role), UnitRole.values, reason: e.id);
         expect(e.byRole(UnitRole.ranged)!.ranged, isTrue, reason: e.id);
-        // Only the Gunpowder heavy (the Cannon Crew) also shoots.
+        // From the Gunpowder Age the heavy shoots too (Cannon Crew, Tank).
+        const shootingHeavy = {'gunpowder', 'modern'};
         expect(e.units.where((u) => u.ranged).map((u) => u.role),
-            e.id == 'gunpowder' ? [UnitRole.ranged, UnitRole.heavy] : [UnitRole.ranged], reason: e.id);
+            shootingHeavy.contains(e.id) ? [UnitRole.ranged, UnitRole.heavy] : [UnitRole.ranged], reason: e.id);
         expect(e.units.where((u) => u.auraBonus > 0).map((u) => u.role), [UnitRole.elite], reason: e.id);
         for (final u in e.units) {
           expect(u.era, e.id, reason: u.id);
@@ -74,6 +75,7 @@ void main() {
       }
       expect(data.era(1).units.map((u) => u.id), ['swordsman', 'archer', 'knight', 'king']);
       expect(data.era(2).units.map((u) => u.id), ['halberdier', 'musketeer', 'cannon', 'captain']);
+      expect(data.era(3).units.map((u) => u.id), ['flamethrower', 'machinegunner', 'tank', 'juggernaut']);
     });
 
     test('later eras are stronger: base, turret and every role', () {
@@ -109,6 +111,26 @@ void main() {
       expect(g.icons['special'], 'icon_cannonbarrage');
     });
 
+    test('Modern: bullets, shells, the rocket pod and the Airstrike', () {
+      final m = data.era(3);
+      expect(m.byRole(UnitRole.ranged)!.projectile, 'modern_bullet');
+      expect(m.byRole(UnitRole.heavy)!.projectile, 'modern_shell');
+      for (final u in m.units.where((u) => u.ranged)) {
+        expect(u.muzzleUp, greaterThan(0), reason: u.id);
+      }
+      // The Flamethrower and the Juggernaut fight up close: no shots.
+      expect(m.byRole(UnitRole.melee)!.ranged, isFalse);
+      expect(m.byRole(UnitRole.elite)!.ranged, isFalse);
+      expect(m.turret.projectile, 'modern_rocket');
+      expect(m.baseArt.turretMuzzle, isNotNull);
+      expect(m.baseArt.slots.length, m.turret.slots);
+      expect(m.meteor.sprite, 'modern_bomb');
+      expect(m.icons['special'], 'icon_airstrike');
+      // The Modern sky is drawn to repeat, so it isn't mirrored.
+      expect(m.layer('sky').mirror, isFalse);
+      expect(m.layer('hills').mirror, isTrue);
+    });
+
     test('base art has one ledge per turret slot; population cap is 10', () {
       expect(data.turret.slots, 3);
       expect(data.baseArt.slots.length, data.turret.slots);
@@ -118,6 +140,17 @@ void main() {
       }
       expect(data.popCap, 10);
       expect(data.baseArt.turretW, inInclusiveRange(0.1, 0.4));
+    });
+
+    test('background layers mirror their repeats unless drawn to tile', () {
+      for (final e in data.eras.where((e) => e.id != 'modern')) {
+        for (final name in ['sky', 'hills', 'near']) {
+          expect(e.layer(name).mirror, isTrue, reason: '${e.id} $name');
+        }
+      }
+      expect(LayerPlace.fromMap({'mirror': false}).mirror, isFalse);
+      expect(LayerPlace.fromMap({'mirror': 'oops'}).mirror, isTrue);
+      expect(LayerPlace.fromMap({}).mirror, isTrue);
     });
 
     test('background layers cover the zoomed-out camera view', () {

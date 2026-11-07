@@ -384,13 +384,18 @@ class BaseArt {
 /// Where a background layer is drawn: [top] and [height] in world units
 /// (the world is 540 tall). Its width follows the picture.
 class LayerPlace {
-  const LayerPlace({this.top = 0, this.height = 540});
+  const LayerPlace({this.top = 0, this.height = 540, this.mirror = true});
 
   final double top;
   final double height;
 
+  /// Every other copy is mirrored so any picture joins seamlessly. A
+  /// picture drawn to repeat (plain sky at both edges) sets "mirror":
+  /// false, so its clouds don't meet their own mirror image at the joins.
+  final bool mirror;
+
   static LayerPlace fromMap(Map<dynamic, dynamic> m) =>
-      LayerPlace(top: m.dbl('top'), height: m.dbl('height', 540));
+      LayerPlace(top: m.dbl('top'), height: m.dbl('height', 540), mirror: m['mirror'] != false);
 }
 
 /// One age: its roster, turret, special, base art, background and the

@@ -79,7 +79,7 @@
     "cost": 700,
     "trainTime": 6.0,
     "hp": 900,
-    "damage": 160,
+    "damage": 150,
     "attackEvery": 2.6,
     "range": 260,
     "speed": 30,

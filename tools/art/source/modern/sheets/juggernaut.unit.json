@@ -1,0 +1,35 @@
+{
+  "id": "juggernaut",
+  "name": "Juggernaut",
+  "role": "elite",
+  "cost": 1600,
+  "trainTime": 8.0,
+  "hp": 2800,
+  "damage": 190,
+  "attackEvery": 1.4,
+  "range": 90,
+  "speed": 32,
+  "killReward": 2080,
+  "xp": 1280,
+  "auraBonus": 0.16,
+  "auraRadius": 170,
+  "sprite": "juggernaut",
+  "era": "modern",
+  "frameW": 366,
+  "frameH": 207,
+  "frames": {
+    "walk": 8,
+    "idle": 8,
+    "attack": 18,
+    "die": 12
+  },
+  "frameTimes": {
+    "idle": 0.15,
+    "walk": 0.12,
+    "attack": 0.0667
+  },
+  "impactFrame": 3,
+  "drawScale": 0.7,
+  "headY": 140,
+  "width": 62
+}

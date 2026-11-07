@@ -1,0 +1,54 @@
+{
+  "base": {
+    "art": {
+      "height": 400,
+      "gate": 0.895,
+      "slots": [
+        [
+          0.858,
+          0.654
+        ],
+        [
+          0.69,
+          0.5
+        ],
+        [
+          0.485,
+          0.346
+        ]
+      ],
+      "turretW": 0.234,
+      "ledgeW": 0.234,
+      "cliff": [
+        0.007,
+        0.246
+      ],
+      "turretMuzzle": [
+        0.292,
+        0.742
+      ]
+    }
+  },
+  "world": {
+    "layers": {
+      "sky": {
+        "top": -140,
+        "height": 690,
+        "mirror": false
+      },
+      "hills": {
+        "top": 10,
+        "height": 460
+      },
+      "near": {
+        "top": 177,
+        "height": 420
+      }
+    }
+  },
+  "icons": {
+    "special": "icon_airstrike",
+    "evolve": "icon_evolve_modern",
+    "turret": "icon_rocketpod"
+  }
+}

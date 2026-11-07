@@ -97,6 +97,7 @@ class BattleGame extends FlameGame {
         priority: p,
         layerTop: place.top,
         layerH: place.height,
+        mirror: place.mirror,
       );
       _layers.add(layer);
       world.add(layer);
@@ -193,6 +194,7 @@ class BattleGame extends FlameGame {
           Sprite(images.fromCache(Img.bg(e.id, name))),
           layerTop: place.top,
           layerH: place.height,
+          mirror: place.mirror,
         );
       }
     }

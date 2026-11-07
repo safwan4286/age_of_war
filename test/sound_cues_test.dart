@@ -53,8 +53,8 @@ void main() {
     expect(cues, isNot(contains(Sfx.meteorImpact)));
   });
 
-  test('turret shots: catapult rocks, ballista bolts and fort cannonballs', () {
-    for (final (era, sfx) in [(0, Sfx.catapult), (1, Sfx.ballista), (2, Sfx.cannon)]) {
+  test('turret shots: catapult rocks, ballista bolts, fort cannonballs and rockets', () {
+    for (final (era, sfx) in [(0, Sfx.catapult), (1, Sfx.ballista), (2, Sfx.cannon), (3, Sfx.rocket)]) {
       final sim = BattleSim(data);
       for (var i = 0; i < era; i++) {
         sim[Side.player].xp = data.era(i).evolveXp;
@@ -82,5 +82,27 @@ void main() {
     run(sim, 6, each: () => cues.addAll(sim.drainEvents().expand((e) => cuesFor(e, sim)).map((c) => c.sfx)));
     expect(cues, containsAll([Sfx.musket, Sfx.cannon]));
     expect(cues, isNot(contains(Sfx.throwStone)));
+  });
+
+  test('Modern: machine-gun bursts, tank guns, flames, the minigun and the jet', () {
+    final sim = BattleSim(data);
+    for (final i in [0, 1, 2]) {
+      sim[Side.player].xp = data.era(i).evolveXp;
+      sim.evolve(Side.player);
+    }
+    place(sim, Side.player, 'machinegunner', 500);
+    place(sim, Side.player, 'tank', 440);
+    place(sim, Side.player, 'flamethrower', 660);
+    place(sim, Side.player, 'juggernaut', 640);
+    place(sim, Side.enemy, 'chief', 700);
+    place(sim, Side.enemy, 'dinorider', 715);
+    final cues = <Sfx>[];
+    run(sim, 6, each: () => cues.addAll(sim.drainEvents().expand((e) => cuesFor(e, sim)).map((c) => c.sfx)));
+    place(sim, Side.enemy, 'chief', 900);
+    sim[Side.player].meteorCharge = 999;
+    sim.castMeteor(Side.player);
+    cues.addAll(sim.drainEvents().expand((e) => cuesFor(e, sim)).map((c) => c.sfx));
+    expect(cues, containsAll([Sfx.machineGun, Sfx.tankGun, Sfx.flame, Sfx.minigun, Sfx.jet]));
+    expect(cues, isNot(contains(Sfx.swingLight)), reason: 'nobody here swings a blade');
   });
 }

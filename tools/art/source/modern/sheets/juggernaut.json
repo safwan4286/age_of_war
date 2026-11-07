@@ -1,0 +1,93 @@
+{
+  "_note": "Juggernaut (Modern elite, aura). Walk: SpriteCook custom 'heavy stomp' (keeps his wide crouched pose; the default front walk slimmed him). Idle: SpriteCook default idle (armour breathing, banner flapping). Attack: 18 frames from Veo (braces, the minigun burst with a flickering flash from frame 3, stops, back to the pose; video frames 0,18,27,33,36,39,42,45,48,51,54,60,66,72,78,84,90,93; tracers/shells past x=1290 cut, the flash's rose glow keyed, the smoke-wisp frames skipped). Death: 12 frames from Veo (minigun dropped, falls to his knees, topples forward face-down under the banner; video frames 0,12,15,18,21,24,36,57,60,63,69,84; the spark frames and the landing dust skipped). Veo ground shadow keyed, sparkle painted out.",
+  "sprite": "juggernaut",
+  "era": "modern",
+  "worldHeight": 140,
+  "width": 62,
+  "targetHeight": 200,
+  "sheets": {
+    "walk": {
+      "file": "juggernaut_walk.png",
+      "cols": 8,
+      "count": 8,
+      "anchor": "median",
+      "scale": 1.0,
+      "detint": true
+    },
+    "idle": {
+      "file": "juggernaut_idle.png",
+      "cols": 8,
+      "count": 8,
+      "anchor": "first",
+      "detint": true
+    },
+    "attack": {
+      "files": [
+        "juggernaut_attack/a00.png",
+        "juggernaut_attack/a01.png",
+        "juggernaut_attack/a02.png",
+        "juggernaut_attack/a03.png",
+        "juggernaut_attack/a04.png",
+        "juggernaut_attack/a05.png",
+        "juggernaut_attack/a06.png",
+        "juggernaut_attack/a07.png",
+        "juggernaut_attack/a08.png",
+        "juggernaut_attack/a09.png",
+        "juggernaut_attack/a10.png",
+        "juggernaut_attack/a11.png",
+        "juggernaut_attack/a12.png",
+        "juggernaut_attack/a13.png",
+        "juggernaut_attack/a14.png",
+        "juggernaut_attack/a15.png",
+        "juggernaut_attack/a16.png",
+        "juggernaut_attack/a17.png"
+      ],
+      "anchor": "first",
+      "scale": 0.651,
+      "smear": true
+    },
+    "die": {
+      "files": [
+        "juggernaut_death/d00.png",
+        "juggernaut_death/d01.png",
+        "juggernaut_death/d02.png",
+        "juggernaut_death/d03.png",
+        "juggernaut_death/d04.png",
+        "juggernaut_death/d05.png",
+        "juggernaut_death/d06.png",
+        "juggernaut_death/d07.png",
+        "juggernaut_death/d08.png",
+        "juggernaut_death/d09.png",
+        "juggernaut_death/d10.png",
+        "juggernaut_death/d11.png"
+      ],
+      "anchor": "first",
+      "scale": 0.651,
+      "smear": true
+    }
+  },
+  "frameTimes": {
+    "idle": 0.15,
+    "walk": 0.12,
+    "attack": 0.0667
+  },
+  "impactFrame": 3,
+  "stats": {
+    "id": "juggernaut",
+    "name": "Juggernaut",
+    "role": "elite",
+    "cost": 1600,
+    "trainTime": 8.0,
+    "hp": 2800,
+    "damage": 190,
+    "attackEvery": 1.4,
+    "range": 90,
+    "speed": 32,
+    "killReward": 2080,
+    "xp": 1280,
+    "auraBonus": 0.16,
+    "auraRadius": 170
+  },
+  "red": "clear",
+  "portraits": true
+}

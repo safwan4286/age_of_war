@@ -537,6 +537,7 @@
     {
       "id": "gunpowder",
       "name": "Gunpowder Age",
+      "evolveXp": 24000,
       "baseHp": 2200,
       "base": {
         "art": {
@@ -761,6 +762,237 @@
           "drawScale": 0.64,
           "headY": 128,
           "width": 48
+        }
+      ]
+    },
+    {
+      "id": "modern",
+      "name": "Modern Age",
+      "baseHp": 3200,
+      "base": {
+        "art": {
+          "height": 400,
+          "gate": 0.895,
+          "slots": [
+            [
+              0.858,
+              0.654
+            ],
+            [
+              0.69,
+              0.5
+            ],
+            [
+              0.485,
+              0.346
+            ]
+          ],
+          "turretW": 0.234,
+          "ledgeW": 0.234,
+          "cliff": [
+            0.007,
+            0.246
+          ],
+          "turretMuzzle": [
+            0.292,
+            0.742
+          ]
+        }
+      },
+      "world": {
+        "layers": {
+          "sky": {
+            "top": -140,
+            "height": 690,
+            "mirror": false
+          },
+          "hills": {
+            "top": 10,
+            "height": 460
+          },
+          "near": {
+            "top": 177,
+            "height": 420
+          }
+        }
+      },
+      "turret": {
+        "id": "rocket_pod",
+        "name": "Rocket Pod",
+        "cost": 700,
+        "damage": 85,
+        "attackEvery": 2.6,
+        "range": 420,
+        "sellBack": 350,
+        "projectileSpeed": 750,
+        "slots": 3,
+        "projectile": "modern_rocket"
+      },
+      "special": {
+        "name": "Airstrike",
+        "sprite": "modern_bomb",
+        "blast": "modern_blast",
+        "cooldown": 60,
+        "count": 10,
+        "duration": 1.6,
+        "damage": 200,
+        "radius": 70,
+        "size": 70,
+        "blastSize": 150,
+        "style": "meteor",
+        "fallTime": 0.5
+      },
+      "icons": {
+        "special": "icon_airstrike",
+        "evolve": "icon_evolve_modern",
+        "turret": "icon_rocketpod"
+      },
+      "units": [
+        {
+          "id": "flamethrower",
+          "name": "Flamethrower Trooper",
+          "role": "melee",
+          "cost": 250,
+          "trainTime": 2.6,
+          "hp": 560,
+          "damage": 100,
+          "attackEvery": 1.4,
+          "range": 60,
+          "speed": 34,
+          "killReward": 325,
+          "xp": 200,
+          "sprite": "flamethrower",
+          "era": "modern",
+          "frameW": 584,
+          "frameH": 217,
+          "frames": {
+            "walk": 8,
+            "idle": 8,
+            "attack": 18,
+            "die": 12
+          },
+          "frameTimes": {
+            "idle": 0.15,
+            "walk": 0.12,
+            "attack": 0.0667
+          },
+          "impactFrame": 6,
+          "drawScale": 0.6169,
+          "headY": 124,
+          "width": 46
+        },
+        {
+          "id": "machinegunner",
+          "name": "Machine Gunner",
+          "role": "ranged",
+          "cost": 330,
+          "trainTime": 3.2,
+          "hp": 300,
+          "damage": 72,
+          "attackEvery": 1.4,
+          "range": 250,
+          "speed": 32,
+          "killReward": 430,
+          "xp": 265,
+          "projectile": "modern_bullet",
+          "projectileSpeed": 900,
+          "muzzle": [
+            68,
+            57
+          ],
+          "sprite": "machinegunner",
+          "era": "modern",
+          "frameW": 496,
+          "frameH": 211,
+          "frames": {
+            "walk": 8,
+            "idle": 8,
+            "attack": 18,
+            "die": 12
+          },
+          "frameTimes": {
+            "idle": 0.15,
+            "walk": 0.12,
+            "attack": 0.0667
+          },
+          "impactFrame": 3,
+          "drawScale": 0.59,
+          "headY": 118,
+          "width": 50
+        },
+        {
+          "id": "tank",
+          "name": "Tank",
+          "role": "heavy",
+          "cost": 700,
+          "trainTime": 6.0,
+          "hp": 900,
+          "damage": 150,
+          "attackEvery": 2.6,
+          "range": 260,
+          "speed": 30,
+          "killReward": 910,
+          "xp": 560,
+          "projectile": "modern_shell",
+          "projectileSpeed": 800,
+          "muzzle": [
+            93,
+            60
+          ],
+          "sprite": "tank",
+          "era": "modern",
+          "frameW": 714,
+          "frameH": 314,
+          "frames": {
+            "walk": 8,
+            "idle": 8,
+            "attack": 18,
+            "die": 12
+          },
+          "frameTimes": {
+            "idle": 0.15,
+            "walk": 0.12,
+            "attack": 0.0667
+          },
+          "impactFrame": 3,
+          "drawScale": 0.52,
+          "headY": 104,
+          "width": 110
+        },
+        {
+          "id": "juggernaut",
+          "name": "Juggernaut",
+          "role": "elite",
+          "cost": 1600,
+          "trainTime": 8.0,
+          "hp": 2800,
+          "damage": 190,
+          "attackEvery": 1.4,
+          "range": 90,
+          "speed": 32,
+          "killReward": 2080,
+          "xp": 1280,
+          "auraBonus": 0.16,
+          "auraRadius": 170,
+          "sprite": "juggernaut",
+          "era": "modern",
+          "frameW": 366,
+          "frameH": 207,
+          "frames": {
+            "walk": 8,
+            "idle": 8,
+            "attack": 18,
+            "die": 12
+          },
+          "frameTimes": {
+            "idle": 0.15,
+            "walk": 0.12,
+            "attack": 0.0667
+          },
+          "impactFrame": 3,
+          "drawScale": 0.7,
+          "headY": 140,
+          "width": 62
         }
       ]
     }

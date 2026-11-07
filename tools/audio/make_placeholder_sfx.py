@@ -112,6 +112,24 @@ def sounds():
     s["musket"] = mix(crack * 1.2, thud(160, .18, .05) * .6, at(lowpass(noise(.3), 1500) * env(int(SR * .3), .01, .1) * .3, .03))
     s["cannon"] = mix(thud(48, 1.0, .32) * 1.4, lowpass(noise(.9), 700) * env(int(SR * .9), .002, .28),
                       highpass(noise(.06), 2500) * env(int(SR * .06), .0005, .015) * .5)
+    burst = np.zeros(int(SR * 0.5))
+    for k in range(6):
+        c = mix(crack * .9, thud(170, .08, .03) * .5)
+        o = int(SR * k * 0.07)
+        burst[o:o + len(c)] += c[: len(burst) - o]
+    s["machine_gun"] = burst
+    s["tank_gun"] = mix(thud(40, 1.1, .35) * 1.5, lowpass(noise(1.0), 600) * env(int(SR * 1.0), .002, .3),
+                        highpass(noise(.08), 2000) * env(int(SR * .08), .0005, .02) * .7)
+    s["rocket"] = mix(lowpass(noise(.7), 2500) * env(int(SR * .7), .01, .25) * .8, whoosh(.6, 400, 3000) * .7,
+                      thud(90, .2, .05) * .5)
+    s["flame"] = lowpass(noise(1.0), 1200) * np.sin(np.linspace(0, np.pi, int(SR * 1.0))) ** .5 * .8
+    spin = np.zeros(int(SR * 0.9))
+    for k in range(14):
+        c = mix(crack * .6, thud(150, .05, .02) * .4)
+        o = int(SR * k * 0.055)
+        spin[o:o + len(c)] += c[: len(spin) - o]
+    s["minigun"] = mix(spin, tone(sweep(120, 300, .9), .9, "saw") * .08)
+    s["jet"] = lowpass(noise(1.6), 1800) * np.sin(np.linspace(0, np.pi, int(SR * 1.6))) ** 2 * .9
     s["hit"] = mix(thud(140, .14, .04), lowpass(noise(.06), 2500) * env(int(SR * .06), .001, .015) * .7)
     s["death"] = mix(thud(80, .35, .12), tone(sweep(300, 120, .3), .3) * env(int(SR * .3), .01, .12) * .25)
     s["coin"] = mix(tone(1320, .08) * env(int(SR * .08), .001, .04), at(tone(1760, .16) * env(int(SR * .16), .001, .07), .06)) * .5
